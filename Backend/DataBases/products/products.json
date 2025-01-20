@@ -1,0 +1,39 @@
+[
+  {
+    "name": "Sofá Moderno",
+    "description": "Un sofá cómodo y moderno ideal para salas de estar.",
+    "price": 250,
+    "category": "Muebles",
+    "stock": 15,
+    "image": "https://example.com/images/sofa-moderno.jpg"
+  },
+  {
+    "name": "Mesa de Centro",
+    "description": "Mesa de centro fabricada en madera de alta calidad.",
+    "price": 120,
+    "category": "Muebles",
+    "stock": 20,
+    "image": "https://example.com/images/mesa-centro.jpg"
+  },
+  {
+    "name": "Silla de Oficina",
+    "description": "Silla ergonómica con soporte lumbar ajustable.",
+    "price": 180,
+    "category": "Oficina",
+    "stock": 25
+  },
+  {
+    "name": "Cama King Size",
+    "description": "Cama grande y cómoda con marco de madera maciza.",
+    "price": 450,
+    "category": "Dormitorio",
+    "stock": 10
+  },
+  {
+    "name": "Lámpara de Pie",
+    "description": "Lámpara de pie con diseño minimalista y luz LED.",
+    "price": 60,
+    "category": "Decoración",
+    "stock": 30
+  }
+]
