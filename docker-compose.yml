@@ -27,6 +27,19 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/db_products
 
+  delete-product: 
+    build:
+      context: ./Backend/Domain/Products/DeleteProduct # Ruta al directorio donde está el Dockerfile de la aplicación
+      dockerfile: Dockerfile
+    ports:
+      - "3011:3011" # Mapea el puerto 3010 del contenedor al host
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/db_products
+
   mongo:
     build:
       context: ./Backend/DataBases/products # Ruta al directorio donde está el Dockerfile de MongoDB
