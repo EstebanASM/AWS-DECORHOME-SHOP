@@ -1,5 +1,5 @@
 {
-  "name": "deleteproduct",
+  "name": "updateproduct",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
@@ -8,10 +8,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "description": "",
   "dependencies": {
     "body-parser": "^1.20.3",
     "express": "^4.21.2",
     "mongoose": "^8.9.5"
-  },
-  "description": ""
+  }
 }
