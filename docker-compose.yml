@@ -26,6 +26,19 @@ services:
       - app-network
     environment:
       - MONGO_URI=mongodb://mongo:27017/db_products
+    
+  buscar-product: 
+    build:
+      context: ./Backend/Domain/Products/GetProductId # Ruta al directorio donde está el Dockerfile de la aplicación
+      dockerfile: Dockerfile
+    ports:
+      - "3013:3013" # Mapea el puerto 3010 del contenedor al host
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/db_products
 
   update-product: 
     build:
