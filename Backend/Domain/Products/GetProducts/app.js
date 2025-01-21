@@ -1,9 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 const PORT = 3010;
+
+// Middleware para habilitar CORS
+app.use(cors());
 
 // Middleware para procesar datos JSON
 app.use(bodyParser.json());
@@ -24,6 +28,7 @@ const productSchema = new mongoose.Schema({
   description: String,
   category: String,
   stock: { type: Number, default: 0 },
+  image: { type: String }, // Nuevo campo para la imagen
 });
 
 const Product = mongoose.model("Product", productSchema);
