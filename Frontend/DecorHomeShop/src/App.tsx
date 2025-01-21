@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import CreateProduct from "./pages/products/CreateProduct";
 import GetProduct from "./pages/products/GetProduct";
+import UpdateProduct from "./pages/products/UpdateProduct";
 
 const App: React.FC = () => {
   return (
@@ -14,6 +15,7 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/getproduct" element={<GetProduct />} />
           <Route path="/createproduct" element={<CreateProduct />} />
+          <Route path="/updateproduct/:id" element={<UpdateProduct />} />
         </Routes>
       </div>
     </Router>

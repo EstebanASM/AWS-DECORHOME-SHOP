@@ -1,12 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 const PORT = 3012;
 
 // Middleware para procesar datos JSON
 app.use(bodyParser.json());
+
+// Middleware para habilitar CORS
+app.use(cors());
 
 // MongoDB URI
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/db_products";
@@ -24,6 +28,7 @@ const productSchema = new mongoose.Schema({
   description: String,
   category: String,
   stock: { type: Number, default: 0 },
+  image: { type: String }, // Nuevo campo para la imagen
 });
 
 const Product = mongoose.model("Product", productSchema);

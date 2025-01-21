@@ -1,8 +1,10 @@
 import React from "react";
 import ProductForm from "../../components/products/ProductForm";
 import { createProduct } from "../../services/products/CreateProduct";
+import { useNavigate } from "react-router-dom";
 
 const CreateProduct: React.FC = () => {
+  const navigate = useNavigate();
   const handleProductSubmit = async (product: {
     name: string;
     price: number;
@@ -14,6 +16,8 @@ const CreateProduct: React.FC = () => {
     try {
       const response = await createProduct(product);
       console.log("Producto creado exitosamente:", response);
+      navigate("/getproduct");
+
     } catch (error) {
       console.error("Error al crear producto:", error);
     }

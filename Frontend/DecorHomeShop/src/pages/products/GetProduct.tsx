@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; 
 import { Link } from "react-router-dom"; // Importa Link para la navegación
 import { getProducts } from "../../services/products/GetProduct"; // Importa la función para consumir la API
+import { deleteProduct } from "../../services/products/DeleteProduct"; // Asegúrate de tener el servicio para eliminar productos
 
 const Home: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]); // Estado para almacenar los productos
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set()); // Estado para productos seleccionados
   const [error, setError] = useState<string | null>(null); // Estado para manejar errores
+  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null); // Estado para el mensaje de confirmación
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -30,8 +32,40 @@ const Home: React.FC = () => {
     setSelectedProducts(updatedSelectedProducts); // Actualiza el estado con los productos seleccionados
   };
 
-  // El botón solo se habilita cuando no hay productos seleccionados
+  const handleDelete = async () => {
+    if (selectedProducts.size > 0) {
+      // Confirma la eliminación
+      const confirmation = window.confirm(
+        `¿Estás seguro de que deseas eliminar ${selectedProducts.size} productos?`
+      );
+
+      if (confirmation) {
+        try {
+          // Elimina los productos seleccionados
+          await Promise.all(
+            Array.from(selectedProducts).map((productId) =>
+              deleteProduct(productId)
+            )
+          );
+          // Actualiza la lista de productos después de eliminar
+          setProducts((prevProducts) =>
+            prevProducts.filter(
+              (product) => !selectedProducts.has(product._id)
+            )
+          );
+          setSelectedProducts(new Set()); // Resetea la selección
+          setConfirmationMessage(null); // Resetea el mensaje de confirmación
+        } catch (error) {
+          console.error("Error al eliminar productos", error);
+          setConfirmationMessage("Hubo un error al eliminar los productos.");
+        }
+      }
+    }
+  };
+
   const isNoProductSelected = selectedProducts.size === 0;
+  const isSingleProductSelected = selectedProducts.size === 1;
+  const selectedProductId = Array.from(selectedProducts)[0]; // Obtener el ID del producto seleccionado
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -58,6 +92,55 @@ const Home: React.FC = () => {
           </button>
         </Link>
       </div>
+
+      {/* Botón de editar solo habilitado cuando un único producto está seleccionado */}
+      <div style={{ marginBottom: "2rem" }}>
+        <Link to={`/updateproduct/${selectedProductId}`}>
+          <button
+            style={{
+              padding: "0.5rem 1rem",
+              backgroundColor: isSingleProductSelected ? "#007bff" : "#d6d6d6", // Cambia el color según si está habilitado o no
+              color: isSingleProductSelected ? "#fff" : "#aaa", // Cambia el color del texto cuando está deshabilitado
+              border: "none",
+              borderRadius: "4px",
+              cursor: isSingleProductSelected ? "pointer" : "not-allowed", // Cambia el cursor cuando está deshabilitado
+              fontSize: "16px",
+              transition: "background-color 0.3s ease",
+            }}
+            disabled={!isSingleProductSelected} // Habilita el botón solo si exactamente un producto está seleccionado
+          >
+            Editar Producto
+          </button>
+        </Link>
+      </div>
+
+      {/* Botón de eliminar productos seleccionados */}
+      <div style={{ marginBottom: "2rem" }}>
+        <button
+          style={{
+            padding: "0.5rem 1rem",
+            backgroundColor: selectedProducts.size > 0 ? "#e74c3c" : "#d6d6d6", // Cambia el color según si hay productos seleccionados
+            color: selectedProducts.size > 0 ? "#fff" : "#aaa", // Cambia el color del texto cuando está deshabilitado
+            border: "none",
+            borderRadius: "4px",
+            cursor: selectedProducts.size > 0 ? "pointer" : "not-allowed", // Cambia el cursor cuando está deshabilitado
+            fontSize: "16px",
+            transition: "background-color 0.3s ease",
+          }}
+          disabled={isNoProductSelected} // Habilita el botón solo si hay productos seleccionados
+          onClick={handleDelete}
+        >
+          Eliminar Producto{selectedProducts.size > 1 ? "s" : ""}
+        </button>
+        {selectedProducts.size > 0 && (
+          <p>
+            Has seleccionado {selectedProducts.size} producto
+            {selectedProducts.size > 1 ? "s" : ""}.
+          </p>
+        )}
+      </div>
+
+      {confirmationMessage && <p>{confirmationMessage}</p>}
 
       <div
         style={{
