@@ -2,6 +2,8 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3000";
 
+
+//Microservicio Agregar producto
 export const createProduct = async (product: {
   name: string;
   price: number;

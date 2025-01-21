@@ -1,6 +1,6 @@
 import React from "react";
 import ProductForm from "../../components/products/ProductForm";
-import { createProduct } from "../../services/api";
+import { createProduct } from "../../services/products/CreateProduct";
 
 const CreateProduct: React.FC = () => {
   const handleProductSubmit = async (product: {

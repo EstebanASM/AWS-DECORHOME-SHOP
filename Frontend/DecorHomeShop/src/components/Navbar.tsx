@@ -9,7 +9,7 @@ const Navbar: React.FC = () => {
           <Link to="/">Inicio</Link>
         </li>
         <li>
-          <Link to="/createproduct">Agregar Producto</Link>
+          <Link to="/getproduct">Productos</Link>
         </li>
       </ul>
     </nav>
