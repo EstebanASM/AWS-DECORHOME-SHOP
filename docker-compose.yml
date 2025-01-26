@@ -1,0 +1,86 @@
+version: "3.9"
+services:
+  create-product: 
+    build:
+      context: ./Backend/Domain/Products/CreateProduct # Ruta al directorio donde está el Dockerfile de la aplicación
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Mapea el puerto 3000 del contenedor al host
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/db_products
+    
+
+  get-product: 
+    build:
+      context: ./Backend/Domain/Products/GetProducts # Ruta al directorio donde está el Dockerfile de la aplicación
+      dockerfile: Dockerfile
+    ports:
+      - "3010:3010" # Mapea el puerto 3010 del contenedor al host
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/db_products
+    
+  buscar-product: 
+    build:
+      context: ./Backend/Domain/Products/GetProductId # Ruta al directorio donde está el Dockerfile de la aplicación
+      dockerfile: Dockerfile
+    ports:
+      - "3013:3013" # Mapea el puerto 3010 del contenedor al host
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/db_products
+
+  update-product: 
+    build:
+      context: ./Backend/Domain/Products/UpdateProduct # Ruta al directorio donde está el Dockerfile de la aplicación
+      dockerfile: Dockerfile
+    ports:
+      - "3012:3012" # Mapea el puerto 3010 del contenedor al host
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/db_products
+
+  delete-product: 
+    build:
+      context: ./Backend/Domain/Products/DeleteProduct # Ruta al directorio donde está el Dockerfile de la aplicación
+      dockerfile: Dockerfile
+    ports:
+      - "3011:3011" # Mapea el puerto 3010 del contenedor al host
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/db_products
+
+  mongo:
+    build:
+      context: ./Backend/DataBases/products # Ruta al directorio donde está el Dockerfile de MongoDB
+      dockerfile: Dockerfile
+    container_name: mongo
+    ports:
+      - "27017:27017" # Mapea el puerto 27017 del contenedor al host
+    networks:
+      - app-network
+    volumes:
+      - mongo-data:/data/db # Persiste los datos de MongoDB
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
