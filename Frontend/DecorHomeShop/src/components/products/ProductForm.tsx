@@ -38,8 +38,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit }) => {
       return;
     }
 
-    if (isNaN(product.price) || isNaN(product.stock)) {
-      setMessage("El precio y el stock deben ser números válidos.");
+    if (isNaN(product.price) || isNaN(product.stock) || product.price <= 0 || product.stock < 0) {
+      setMessage("El precio debe ser un número positivo y el stock no puede ser negativo.");
+      return;
+    }
+
+    const imageUrlPattern = /^(http|https):\/\/[^ "]+$/;
+    if (product.image && !imageUrlPattern.test(product.image)) {
+      setMessage("La URL de la imagen no es válida.");
       return;
     }
 
@@ -69,49 +75,73 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit }) => {
     <div className="form-container">
       {message && <p className="success-message">{message}</p>} {/* Mostrar el mensaje de éxito o error */}
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Nombre del producto"
-          value={product.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Precio"
-          value={product.price}
-          onChange={handleChange}
-          required
-        />
-        <textarea
-          name="description"
-          placeholder="Descripción"
-          value={product.description}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="category"
-          placeholder="Categoría"
-          value={product.category}
-          onChange={handleChange}
-        />
-        <input
-          type="number"
-          name="stock"
-          placeholder="Stock"
-          value={product.stock}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          name="image"
-          placeholder="URL de la imagen"
-          value={product.image}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <label htmlFor="name">Nombre del producto:</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Nombre del producto"
+            value={product.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="price">Precio:</label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            placeholder="Precio"
+            value={product.price}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="description">Descripción:</label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Descripción"
+            value={product.description}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="category">Categoría:</label>
+          <input
+            type="text"
+            id="category"
+            name="category"
+            placeholder="Categoría"
+            value={product.category}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="stock">Stock:</label>
+          <input
+            type="number"
+            id="stock"
+            name="stock"
+            placeholder="Stock"
+            value={product.stock}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="image">URL de la imagen:</label>
+          <input
+            type="text"
+            id="image"
+            name="image"
+            placeholder="URL de la imagen"
+            value={product.image}
+            onChange={handleChange}
+          />
+        </div>
         <button type="submit">Crear Producto</button>
       </form>
     </div>
@@ -119,3 +149,4 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit }) => {
 };
 
 export default ProductForm;
+
