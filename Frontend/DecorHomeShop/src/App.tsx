@@ -5,6 +5,9 @@ import Home from "./pages/Home";
 import CreateProduct from "./pages/products/CreateProduct";
 import GetProduct from "./pages/products/GetProduct";
 import UpdateProduct from "./pages/products/UpdateProduct";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Logout from "./pages/auth/Logout";
 
 const App: React.FC = () => {
   return (
@@ -17,6 +20,9 @@ const App: React.FC = () => {
             <Route path="/getproduct" element={<GetProduct />} />
             <Route path="/createproduct" element={<CreateProduct />} />
             <Route path="/updateproduct/:id" element={<UpdateProduct />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/logout" element={<Logout />} />
           </Routes>
         </div>
       </div>

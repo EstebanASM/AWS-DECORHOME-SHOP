@@ -36,7 +36,7 @@ const Home: React.FC = () => {
   const handleDelete = async () => {
     if (selectedProducts.size > 0) {
       const confirmation = window.confirm(
-        `¿Estás seguro de que deseas eliminar ${selectedProducts.size} productos?`
+        `Are you sure you want to delete ${selectedProducts.size} products?`
       );
 
       if (confirmation) {
@@ -54,8 +54,8 @@ const Home: React.FC = () => {
           setSelectedProducts(new Set());
           setConfirmationMessage(null); 
         } catch (error) {
-          console.error("Error al eliminar productos", error);
-          setConfirmationMessage("Hubo un error al eliminar los productos.");
+          console.error("Error deleting products", error);
+          setConfirmationMessage("There was an error deleting the products.");
         }
       }
     }
@@ -68,10 +68,10 @@ const Home: React.FC = () => {
 
   return (
     <div style={{ padding: "1rem" }}>
-      <Typography variant="h4" gutterBottom>Productos</Typography>
+      <Typography variant="h4" gutterBottom>Products</Typography>
       {error && <Typography color="error">{error}</Typography>}
 
-      {/* Botones en una fila */}
+      {/* Buttons in a row */}
       <Box display="flex" justifyContent="space-between" marginBottom="2rem">
         <Link to="/createproduct">
           <Button
@@ -82,7 +82,7 @@ const Home: React.FC = () => {
               width: "200px",
             }}
           >
-            Agregar Producto
+            Add Product
           </Button>
         </Link>
 
@@ -95,7 +95,7 @@ const Home: React.FC = () => {
               width: "200px",
             }}
           >
-            Editar Producto
+            Edit Product
           </Button>
         </Link>
 
@@ -108,13 +108,13 @@ const Home: React.FC = () => {
             width: "200px",
           }}
         >
-          Eliminar Producto{selectedProducts.size > 1 ? "s" : ""}
+          Delete Product{selectedProducts.size > 1 ? "s" : ""}
         </Button>
       </Box>
 
       {confirmationMessage && <Typography>{confirmationMessage}</Typography>}
 
-      {/* Mostrar los productos */}
+      {/* Display products */}
       <Grid container spacing={2}>
         {products.length > 0 ? (
           products.map((product) => (
@@ -142,16 +142,16 @@ const Home: React.FC = () => {
                 <Typography variant="h6">{product.name}</Typography>
                 <Typography variant="body2">{product.description}</Typography>
                 <Typography variant="body1" color="primary">
-                  <strong>Precio:</strong> ${product.price}
+                  <strong>Price:</strong> ${product.price}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Categoría:</strong> {product.category}
+                  <strong>Category:</strong> {product.category}
                 </Typography>
                 <Typography variant="body2">
                   <strong>Stock:</strong> {product.stock}
                 </Typography>
 
-                {/* Cuadro de selección para marcar productos */}
+                {/* Checkbox for selecting products */}
                 <input
                   type="checkbox"
                   checked={selectedProducts.has(product._id)}
@@ -167,7 +167,7 @@ const Home: React.FC = () => {
             </Grid>
           ))
         ) : (
-          <Typography>No hay productos disponibles</Typography>
+          <Typography>No products available</Typography>
         )}
       </Grid>
     </div>
@@ -175,5 +175,6 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
 
 

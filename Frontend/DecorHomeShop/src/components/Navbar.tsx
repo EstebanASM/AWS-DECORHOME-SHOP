@@ -1,47 +1,38 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { AppBar, Toolbar, Button } from "@mui/material";
 
 const Navbar: React.FC = () => {
   return (
-    <nav
+    <AppBar
+      position="static"
       style={{
-        padding: "1rem",
         backgroundColor: "#343a40",
-        color: "#fff",
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-        position: "fixed",
-        width: "100%",
-        top: 0,
-        left: 0,
-        zIndex: 1000,
+        width: "100%",  // Asegura que el navbar ocupe todo el ancho de la pantalla
       }}
     >
-      <ul
-        style={{
-          display: "flex",
-          listStyle: "none",
-          gap: "2rem",
-          margin: 0,
-          padding: 0,
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "1.2rem",
-        }}
-      >
-        <li>
-          <Link to="/" style={{ color: "#fff", textDecoration: "none" }}>
-            Inicio
-          </Link>
-        </li>
-        <li>
-          <Link to="/getproduct" style={{ color: "#fff", textDecoration: "none" }}>
-            Productos
-          </Link>
-        </li>
-      </ul>
-    </nav>
+      <Toolbar style={{ padding: "1rem", justifyContent: "center", width: "100%" }}>
+        <Button color="inherit" component={Link} to="/" style={{ fontSize: "1.2rem", textDecoration: "none" }}>
+          Inicio
+        </Button>
+        <Button color="inherit" component={Link} to="/getproduct" style={{ fontSize: "1.2rem", textDecoration: "none" }}>
+          Productos
+        </Button>
+        <Button color="inherit" component={Link} to="/login" style={{ fontSize: "1.2rem", textDecoration: "none" }}>
+          Login
+        </Button>
+        <Button color="inherit" component={Link} to="/register" style={{ fontSize: "1.2rem", textDecoration: "none" }}>
+          Register
+        </Button>
+        <Button color="inherit" component={Link} to="/logout" style={{ fontSize: "1.2rem", textDecoration: "none" }}>
+          Logout
+        </Button>
+      </Toolbar>
+    </AppBar>
   );
 };
 
 export default Navbar;
+
 
