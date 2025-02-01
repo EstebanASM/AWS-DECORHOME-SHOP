@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from crud import get_categories
 from database import get_db
 
+
 # Cargar el esquema GraphQL desde el archivo
 schema = load_schema_from_path("graphql_schema.graphql")
 
