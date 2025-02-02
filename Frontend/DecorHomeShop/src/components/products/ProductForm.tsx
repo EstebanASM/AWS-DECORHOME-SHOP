@@ -1,3 +1,4 @@
+// src/components/products/ProductForm.tsx
 import React, { useState } from "react";
 import "../../App.css";
 
@@ -10,9 +11,10 @@ interface ProductFormProps {
     stock: number;
     image: string;
   }) => void;
+  categories: { id: string; name: string }[]; // Recibe las categorías
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ onSubmit }) => {
+const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
   const [product, setProduct] = useState({
     name: "",
     price: 0,
@@ -24,7 +26,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit }) => {
 
   const [message, setMessage] = useState(""); // Mensaje de éxito o error
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProduct({ ...product, [name]: value });
   };
@@ -111,14 +113,24 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit }) => {
         </div>
         <div className="form-group">
           <label htmlFor="category">Categoría:</label>
-          <input
-            type="text"
-            id="category"
+          <select
             name="category"
-            placeholder="Categoría"
             value={product.category}
             onChange={handleChange}
-          />
+            required
+          >
+            <option value="">Seleccionar Categoría</option>
+            {/* Verifica que categories tenga elementos antes de llamar map */}
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))
+            ) : (
+              <option value="">No hay categorías disponibles</option>
+            )}
+          </select>
         </div>
         <div className="form-group">
           <label htmlFor="stock">Stock:</label>
@@ -149,4 +161,3 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit }) => {
 };
 
 export default ProductForm;
-

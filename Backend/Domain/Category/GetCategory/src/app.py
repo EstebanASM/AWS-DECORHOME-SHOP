@@ -4,13 +4,22 @@ from ariadne.asgi import GraphQL
 from sqlalchemy.orm import Session
 from crud import get_categories
 from database import get_db
-
+from fastapi.middleware.cors import CORSMiddleware
 
 # Cargar el esquema GraphQL desde el archivo
 schema = load_schema_from_path("graphql_schema.graphql")
 
 # Crear el ejecutor de GraphQL
 app = FastAPI()
+
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Cambia esto si tienes otro origen
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Resolver la consulta de categories
 from ariadne import QueryType

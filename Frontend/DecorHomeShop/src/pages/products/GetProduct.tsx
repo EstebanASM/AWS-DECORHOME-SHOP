@@ -1,27 +1,49 @@
-import React, { useEffect, useState } from "react"; 
-import { Link } from "react-router-dom"; 
-import { getProducts } from "../../services/products/GetProduct"; 
-import { deleteProduct } from "../../services/products/DeleteProduct"; 
-import { Grid, Button, Typography, Box } from '@mui/material'; 
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { getProducts } from "../../services/products/GetProduct";
+import { deleteProduct } from "../../services/products/DeleteProduct";
+import { getCategoryById } from "../../services/categories/getCategoryById";
+
+import { Grid, Button, Typography, Box } from '@mui/material';
 
 const Home: React.FC = () => {
-  const [products, setProducts] = useState<any[]>([]); 
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set()); 
-  const [error, setError] = useState<string | null>(null); 
-  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null); 
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
+  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await getProducts(); 
-        setProducts(data); 
+        const data = await getProducts();
+        setProducts(data);
+  
+        // Obtener los nombres de las categorías
+        const categoryNames: { [key: string]: string } = {};
+        await Promise.all(
+          data.map(async (product) => {
+            if (product.category && !categoryNames[product.category]) {
+              try {
+                const categoryData = await getCategoryById(product.category);
+                categoryNames[product.category] = categoryData.name;
+              } catch (error) {
+                console.error("Error al obtener la categoría", error);
+              }
+            }
+          })
+        );
+  
+        // Establecer las categorías solo cuando todos los datos estén listos
+        setCategories(categoryNames);
       } catch (error: any) {
-        setError(error.message); 
+        setError(error.message);
       }
     };
-
-    fetchProducts(); 
-  }, []); 
+  
+    fetchProducts();
+  }, []);
+  
 
   const handleCheckboxChange = (productId: string) => {
     const updatedSelectedProducts = new Set(selectedProducts);
@@ -30,7 +52,7 @@ const Home: React.FC = () => {
     } else {
       updatedSelectedProducts.add(productId);
     }
-    setSelectedProducts(updatedSelectedProducts); 
+    setSelectedProducts(updatedSelectedProducts);
   };
 
   const handleDelete = async () => {
@@ -52,7 +74,7 @@ const Home: React.FC = () => {
             )
           );
           setSelectedProducts(new Set());
-          setConfirmationMessage(null); 
+          setConfirmationMessage(null);
         } catch (error) {
           console.error("Error al eliminar productos", error);
           setConfirmationMessage("Hubo un error al eliminar los productos.");
@@ -64,7 +86,7 @@ const Home: React.FC = () => {
   const isNoProductSelected = selectedProducts.size === 0;
   const isSingleProductSelected = selectedProducts.size === 1;
   const isMultipleProductsSelected = selectedProducts.size > 0;
-  const selectedProductId = Array.from(selectedProducts)[0]; 
+  const selectedProductId = Array.from(selectedProducts)[0];
 
   return (
     <div style={{ padding: "1rem" }}>
@@ -145,7 +167,7 @@ const Home: React.FC = () => {
                   <strong>Precio:</strong> ${product.price}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Categoría:</strong> {product.category}
+                  <strong>Categoría:</strong> {categories[product.category] || "Cargando..."}
                 </Typography>
                 <Typography variant="body2">
                   <strong>Stock:</strong> {product.stock}
@@ -175,5 +197,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
-
