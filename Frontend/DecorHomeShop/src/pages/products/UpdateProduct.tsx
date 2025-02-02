@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // Añadimos useParams para obtener el ID del producto
-import { updateProduct } from "../../services/products/UpdateProduct"; // Servicio para hacer PUT a la API
-import { getProductById } from "../../services/products/GetProductId"; // Servicio para obtener un producto por ID
+import { useNavigate, useParams } from "react-router-dom";
+import { updateProduct } from "../../services/products/UpdateProduct";
+import { getProductById } from "../../services/products/GetProductId";
+import { getCategories } from "../../services/categories/getCategories"; // Servicio para obtener categorías
 
-// Definir una interfaz para el producto
 interface Product {
   name: string;
   price: number;
-  description: string;
   category: string;
   stock: number;
   image: string;
@@ -15,35 +14,47 @@ interface Product {
 
 const UpdateProduct: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>(); // Obtenemos el ID del producto desde los parámetros de la URL
+  const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product>({
     name: "",
     price: 0,
-    description: "",
     category: "",
     stock: 0,
     image: "",
   });
+  const [categories, setCategories] = useState<{ [key: string]: string }>({});
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Función para obtener el producto por su ID y cargarlo en el formulario
     const fetchProduct = async () => {
       try {
         if (id) {
-          const fetchedProduct = await getProductById(id); // Llama al servicio para obtener el producto
-          setProduct(fetchedProduct); // Establece el producto en el estado
+          const fetchedProduct = await getProductById(id);
+          setProduct(fetchedProduct);
         }
       } catch (err) {
         setError("Error al cargar el producto");
       }
     };
 
+    const fetchCategories = async () => {
+      try {
+        const categoryData = await getCategories(); // Llama al servicio para obtener categorías
+        const categoryNames: { [key: string]: string } = {};
+        categoryData.forEach((category: { id: string, name: string }) => {
+          categoryNames[category.id] = category.name;
+        });
+        setCategories(categoryNames);
+      } catch (err) {
+        setError("Error al cargar las categorías");
+      }
+    };
+
     fetchProduct();
+    fetchCategories();
   }, [id]);
 
-  // Maneja los cambios en el formulario
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setProduct((prevProduct: Product) => ({
       ...prevProduct,
@@ -51,14 +62,13 @@ const UpdateProduct: React.FC = () => {
     }));
   };
 
-  // Maneja el envío del formulario para actualizar el producto
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (id) {
-        const updatedProduct = await updateProduct(id, product); // Actualiza el producto
+        const updatedProduct = await updateProduct(id, product);
         console.log("Producto actualizado:", updatedProduct);
-        navigate("/getproduct"); // Redirige a la página de inicio después de la actualización
+        navigate("/getproduct");
       }
     } catch (err) {
       setError("Error al actualizar el producto");
@@ -94,28 +104,25 @@ const UpdateProduct: React.FC = () => {
             style={{ width: "100%", padding: "0.5rem" }}
           />
         </div>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="description">Descripción</label>
-          <input
-            type="text"
-            id="description"
-            name="description"
-            value={product.description}
-            onChange={handleChange}
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
-        </div>
+
         <div style={{ marginBottom: "1rem" }}>
           <label htmlFor="category">Categoría</label>
-          <input
-            type="text"
+          <select
             id="category"
             name="category"
             value={product.category}
             onChange={handleChange}
             style={{ width: "100%", padding: "0.5rem" }}
-          />
+          >
+            <option value="">Seleccione una categoría</option>
+            {Object.keys(categories).map((categoryId) => (
+              <option key={categoryId} value={categoryId}>
+                {categories[categoryId]}
+              </option>
+            ))}
+          </select>
         </div>
+
         <div style={{ marginBottom: "1rem" }}>
           <label htmlFor="stock">Stock</label>
           <input

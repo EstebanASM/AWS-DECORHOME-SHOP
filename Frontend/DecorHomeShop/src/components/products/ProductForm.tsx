@@ -6,7 +6,6 @@ interface ProductFormProps {
   onSubmit: (product: {
     name: string;
     price: number;
-    description: string;
     category: string;
     stock: number;
     image: string;
@@ -18,7 +17,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
   const [product, setProduct] = useState({
     name: "",
     price: 0,
-    description: "",
     category: "",
     stock: 0,
     image: "",
@@ -58,7 +56,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
     setProduct({
       name: "",
       price: 0,
-      description: "",
       category: "",
       stock: 0,
       image: "",
@@ -101,16 +98,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
             required
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="description">Descripción:</label>
-          <textarea
-            id="description"
-            name="description"
-            placeholder="Descripción"
-            value={product.description}
-            onChange={handleChange}
-          />
-        </div>
+        
         <div className="form-group">
           <label htmlFor="category">Categoría:</label>
           <select

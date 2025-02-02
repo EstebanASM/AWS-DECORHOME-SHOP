@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { getProducts } from "../../services/products/GetProduct";
 import { deleteProduct } from "../../services/products/DeleteProduct";
 import { getCategoryById } from "../../services/categories/getCategoryById";
-
 import { Grid, Button, Typography, Box } from '@mui/material';
 
 const Home: React.FC = () => {
@@ -21,8 +20,9 @@ const Home: React.FC = () => {
   
         // Obtener los nombres de las categorías
         const categoryNames: { [key: string]: string } = {};
+
         await Promise.all(
-          data.map(async (product) => {
+          data.map(async (product: Product) => {
             if (product.category && !categoryNames[product.category]) {
               try {
                 const categoryData = await getCategoryById(product.category);
