@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors"); // Importar el paquete cors
-const axios = require("axios"); // Importar axios para hacer la solicitud HTTP
 
 const app = express();
 const PORT = 3000;
@@ -34,47 +33,9 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.model("Product", productSchema);
 
-// Función para verificar si la categoría existe usando GraphQL
-const checkCategoryExists = async (categoryId) => {
-  const query = `
-    query {
-      categories {
-        id
-        name
-      }
-    }
-  `;
-
-  try {
-    const response = await axios.post("http://localhost:8002/getgraphql", {
-      query: query,
-    });
-
-    // Filtrar la categoría por ID
-    const categories = response.data.data.categories;
-    const categoryExists = categories.some(
-      (category) => category.id === categoryId
-    );
-
-    return categoryExists;
-  } catch (error) {
-    throw new Error("Error al obtener las categorías del servicio de categorías.");
-  }
-};
-
 // Ruta para crear un producto
 app.post("/products", async (req, res) => {
-  const { category } = req.body;
-
   try {
-    // Verificar si la categoría existe en el microservicio de categorías
-    const categoryExists = await checkCategoryExists(category);
-
-    if (!categoryExists) {
-      return res.status(404).json({ message: "Categoría no encontrada" });
-    }
-
-    // Crear y guardar el producto si la categoría es válida
     const newProduct = new Product(req.body); // Crear una instancia del modelo con los datos enviados
     const savedProduct = await newProduct.save(); // Guardar en la base de datos
     res.status(201).json(savedProduct); // Responder con el producto creado
