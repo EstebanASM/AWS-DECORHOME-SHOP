@@ -1,13 +1,15 @@
-# Usar la imagen oficial de MongoDB como base
+# Usar la imagen oficial de MongoDB
 FROM mongo:latest
 
-# Instalar el cliente de MongoDB
-RUN apt-get update && apt-get install -y mongodb-org-shell
-
-# Configuración del contenedor
+# Establecer directorio de trabajo
 WORKDIR /data
+
+# Copiar los archivos de datos y el script de inicialización
 COPY stock.json /data/stock.json
 COPY init-mongo.sh /docker-entrypoint-initdb.d/init-mongo.sh
+
+# Dar permisos de ejecución al script
 RUN chmod +x /docker-entrypoint-initdb.d/init-mongo.sh
 
-EXPOSE 27018
+# Exponer el puerto de MongoDB
+EXPOSE 27017
