@@ -1,0 +1,63 @@
+name: Deploy MongoDB to EC2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mongo-ci.yml'
+    branches: [ "test" ]
+  pull_request:
+    paths:
+      - '.github/workflows/mongo-ci.yml'
+    branches: 
+      - "QA"
+      - "main"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Connect to EC2 and deploy MongoDB using docker run
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST_MONGODB }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            echo "✅ SSH connection successful"
+
+            # Check if Docker is installed, install if necessary
+            if ! command -v docker &> /dev/null; then
+              echo "⚙️ Installing Docker..."
+              sudo yum update -y
+              sudo yum install -y docker
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker $USER
+            fi
+
+            # Remove existing MongoDB container if it exists
+            if [ "$(sudo docker ps -aq -f name=mongo_container)" ]; then
+              echo "🗑 Removing existing MongoDB container..."
+              sudo docker stop mongo_container
+              sudo docker rm mongo_container
+            fi
+
+            # Run MongoDB using docker run
+            echo "🚀 Starting MongoDB..."
+            sudo docker run -d \
+              --name mongo_container \
+              -p ${{ secrets.MONGODB_PORT }}:27017 \
+              -e MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGODB_USER }} \
+              -e MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGODB_PASSWORD }} \
+              -v /home/${{ secrets.EC2_USER }}/mongodb_data:/data/db \
+              --restart unless-stopped \
+              mongo
+
+            echo "✅ MongoDB successfully deployed on EC2"
