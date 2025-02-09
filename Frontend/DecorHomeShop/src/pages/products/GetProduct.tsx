@@ -4,6 +4,7 @@ import { getProducts } from "../../services/products/GetProduct";
 import { deleteProduct } from "../../services/products/DeleteProduct";
 import { getCategoryById } from "../../services/categories/getCategoryById";
 import { Grid, Button, Typography, Box } from '@mui/material';
+import AddToCartButton from '../../components/cart/AddToCartButton'; // Importar el botón de añadir al carrito
 
 const Home: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -185,6 +186,9 @@ const Home: React.FC = () => {
                     transform: "scale(1.5)",
                   }}
                 />
+
+                {/* Botón de Añadir al carrito */}
+                <AddToCartButton productId={product._id} />
               </Box>
             </Grid>
           ))
