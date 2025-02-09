@@ -1,51 +1,76 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const mysql = require("mysql2/promise");
-const cors = require("cors");
-require("dotenv").config();
+import express from 'express';
+import cors from 'cors';
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+import validator from 'validator';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-const PORT = process.env.PORT || 4010;
+// Conexión a la base de datos
+let db;
+async function connectDB() {
+  try {
+    db = await mysql.createConnection({
+      host: process.env.DB_HOST || "localhost",
+      user: process.env.DB_USER || "admin",
+      password: process.env.DB_PASSWORD || "adminpass",
+      database: process.env.DB_NAME || "auth_db",
+    });
+    console.log('✅ Conexión a la base de datos establecida');
+  } catch (error) {
+    console.error('❌ Error conectando a la base de datos:', error.message);
+    process.exit(1); // Salir si hay un error crítico
+  }
+}
+await connectDB();
 
-// Configuración de la conexión a MySQL
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "admin",
-  password: process.env.DB_PASSWORD || "adminpass",
-  database: process.env.DB_NAME || "auth_db",
-});
+// Endpoint para registro
+app.post('/register', async (req, res) => {
+  const { username, email, password } = req.body;
 
-// Registro de usuario
-app.post("/register", async (req, res) => {
-  const { username, password, role } = req.body;
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+  }
 
-  if (!username || !password) {
-    return res.status(400).json({ error: "El nombre de usuario y contraseña son obligatorios" });
+  // Validar el correo electrónico
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ message: 'El correo electrónico no es válido' });
   }
 
   try {
-    const [existingUser] = await pool.query("SELECT * FROM users WHERE username = ?", [username]);
-    if (existingUser.length > 0) {
-      return res.status(400).json({ error: "El usuario ya existe" });
+    // Verificar si el usuario o correo ya existen
+    const [existingUser] = await db.execute(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, email]
+    );
+
+    if (existingUser && existingUser.length > 0) {
+      return res.status(400).json({ message: 'El usuario o el correo ya existen' });
     }
 
-    await pool.query("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", [
-      username,
-      password,
-      role || "user", // El rol por defecto es 'user'
-    ]);
+    // Insertar usuario en la base de datos sin encriptar la contraseña
+    await db.execute(
+      'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
+      [username, email, password, 'user']
+    );
 
-    res.status(201).json({ message: "Usuario registrado exitosamente" });
+    res.status(201).json({ message: '✅ Usuario registrado correctamente' });
   } catch (error) {
-    console.error("Error al registrar usuario:", error);
-    res.status(500).json({ error: "Error en el servidor" });
+    console.error('❌ Error en el registro:', error);
+    res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 });
 
-
+const PORT = process.env.PORT || 4013;
 app.listen(PORT, () => {
-  console.log(`Servidor de registro corriendo en http://localhost:${PORT}`);
+  console.log(`🚀 Microservicio de registro en el puerto ${PORT}`);
 });
+
+
+
+
+

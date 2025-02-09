@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Exponemos el puerto que utiliza el microservicio
-EXPOSE 4001
+EXPOSE 4010
 
 # Comando para iniciar la aplicación
 CMD ["npm", "start"]
