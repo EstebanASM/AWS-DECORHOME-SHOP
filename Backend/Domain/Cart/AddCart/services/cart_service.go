@@ -1,25 +1,37 @@
-package main
+package services
 
 import (
-	"log"
-	"net/http"
+	"context"
+	"time"
 
 	"Backend/Domain/Cart/AddCart/config"
-	"Backend/Domain/Cart/AddCart/handlers"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-func main() {
-	// Inicializar la configuración y conexiones a las bases de datos.
-	if err := config.Init(); err != nil {
-		log.Fatalf("Error en la inicialización: %v", err)
-	}
+// ProductExists verifica en MongoDB si el producto existe.
+// Se asume que el producto se identifica por el campo "_id".
+func ProductExists(productID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	// Configurar la ruta para el WebSocket.
-	http.HandleFunc("/ws", handlers.HandleWebSocket)
-
-	port := 8080
-	log.Printf("Servidor WebSocket escuchando en :%d", port)
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("Error en ListenAndServe: %v", err)
+	filter := bson.M{"_id": productID}
+	count, err := config.MongoCollection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
 	}
+	return count > 0, nil
+}
+
+// AddToCart inserta o actualiza un producto en la tabla "cart" de MySQL.
+// Se asume que la tabla tiene una restricción UNIQUE sobre "product_id".
+func AddToCart(productID string, quantity int) error {
+	query := `
+		INSERT INTO cart (product_id, quantity, added_at, updated_at)
+		VALUES (?, ?, NOW(), NOW())
+		ON DUPLICATE KEY UPDATE quantity = quantity + ?,
+		                        updated_at = NOW();
+	`
+	_, err := config.DBMySQL.Exec(query, productID, quantity, quantity)
+	return err
 }
