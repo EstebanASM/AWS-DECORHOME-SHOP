@@ -46,22 +46,44 @@ func AddToCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Insertar en la base de datos MySQL como string
-	query := "INSERT INTO cart (product_id, quantity) VALUES (?, ?)"
-	resultSQL, err := config.DB.Exec(query, item.ProductID, item.Quantity)
-	if err != nil {
-		http.Error(w, "Error al agregar al carrito", http.StatusInternalServerError)
+	// Verificar si el producto ya está en el carrito (comprobando por product_id)
+	var existingItem models.CartItem
+	err = config.DB.QueryRow("SELECT id, product_id, quantity FROM cart WHERE product_id = ?", item.ProductID).Scan(&existingItem.ID, &existingItem.ProductID, &existingItem.Quantity)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		http.Error(w, "Error al consultar el carrito", http.StatusInternalServerError)
 		return
 	}
 
-	// Obtener el ID del producto agregado
-	insertedID, err := resultSQL.LastInsertId()
-	if err != nil {
-		http.Error(w, "Error al obtener el ID del producto agregado", http.StatusInternalServerError)
-		return
+	// Si el producto ya está en el carrito, actualizamos la cantidad
+	if existingItem.ProductID != "" {
+		// Calculamos la nueva cantidad
+		newQuantity := existingItem.Quantity + item.Quantity
+		_, err = config.DB.Exec("UPDATE cart SET quantity = ? WHERE product_id = ?", newQuantity, item.ProductID)
+		if err != nil {
+			http.Error(w, "Error al actualizar el carrito", http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, "✅ Producto actualizado en el carrito. Nueva cantidad: %d", newQuantity)
+	} else {
+		// Si el producto no está en el carrito, lo agregamos
+		query := "INSERT INTO cart (product_id, quantity) VALUES (?, ?)"
+		resultSQL, err := config.DB.Exec(query, item.ProductID, item.Quantity)
+		if err != nil {
+			http.Error(w, "Error al agregar al carrito", http.StatusInternalServerError)
+			return
+		}
+
+		// Obtener el ID del producto agregado
+		insertedID, err := resultSQL.LastInsertId()
+		if err != nil {
+			http.Error(w, "Error al obtener el ID del producto agregado", http.StatusInternalServerError)
+			return
+		}
+
+		// Responder con éxito
+		fmt.Fprintf(w, "✅ Producto agregado al carrito con ID: %d", insertedID)
 	}
 
-	// Responder con éxito
-	fmt.Fprintf(w, "✅ Producto agregado al carrito con ID: %d", insertedID)
+	// Imprimir los datos recibidos en el log
 	fmt.Printf("Datos recibidos: product_id: %v, quantity: %d\n", item.ProductID, item.Quantity)
 }
