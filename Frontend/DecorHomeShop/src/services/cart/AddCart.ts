@@ -1,23 +1,26 @@
-// Conexión al servidor WebSocket
-const socket = new WebSocket("ws://localhost:8015/ws");
+const API_URL = "http://localhost:8015/cart"; // Asegúrate de que este sea el endpoint correcto
 
-socket.onopen = () => {
-  console.log("Conectado al servidor WebSocket");
+export const addToCart = async (productId: string, quantity: number) => {
+  try {
+    // Convertir productId a string
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ product_id: productId, quantity }), // Mantén productId como string
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(`Error al añadir el producto al carrito: ${errorMessage}`);
+    }
+
+    // Si la respuesta es un mensaje de texto, maneja esa respuesta
+    const message = await response.text();
+    return { message };
+  } catch (error) {
+    console.error("❌ Error en addToCart:", error);
+    throw error;
+  }
 };
-
-socket.onmessage = (event) => {
-  console.log("Mensaje recibido:", event.data);
-};
-
-socket.onclose = () => {
-  console.log("Desconectado del servidor WebSocket");
-};
-
-// Función para enviar un mensaje al servidor
-const addToCartWebSocket = (productID: string, quantity: number) => {
-  const message = JSON.stringify({ product_id: productID, quantity });
-  socket.send(message);
-};
-
-// Exporta las funciones para usarlas en otros archivos
-export { addToCartWebSocket, socket };

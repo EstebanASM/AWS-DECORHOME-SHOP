@@ -5,17 +5,33 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/EstebanASM/AWS-DECORHOME-SHOP/Backend/Domain/Cart/AddCart/handlers"
+	"github.com/EstebanASM/AWS-DECORHOME-SHOP/Backend/Domain/Cart/AddCart/config"
+	"github.com/EstebanASM/AWS-DECORHOME-SHOP/Backend/Domain/Cart/AddCart/routes"
+	"github.com/gorilla/mux"
+	"github.com/rs/cors" // Importa el paquete para habilitar CORS
 )
 
 func main() {
-	// Ruta para WebSocket
-	http.HandleFunc("/ws", handlers.HandleWS)
+	// Conectar a MySQL
+	config.ConectarDB()
 
-	port := 8015
-	fmt.Printf("Servidor corriendo en el puerto %d\n", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-	if err != nil {
-		log.Fatal("Error iniciando el servidor:", err)
-	}
+	// Conectar a MongoDB
+	config.ConectarMongoDB()
+
+	// Configurar el router y las rutas
+	router := mux.NewRouter()
+	routes.RegistrarRutas(router)
+
+	// Configurar CORS: Permitir solicitudes de todos los orígenes
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Permite solicitudes de todos los orígenes
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		ExposedHeaders:   []string{"Content-Length"},
+		AllowCredentials: true,
+	})
+
+	// Iniciar el servidor con CORS habilitado
+	fmt.Println("🚀 Servidor corriendo en http://localhost:8015")
+	log.Fatal(http.ListenAndServe(":8015", corsHandler.Handler(router))) // Envolviendo el router con CORS
 }

@@ -1,4 +1,4 @@
-module github.com/EstebanASM/AWS-DECORHOME-SHOP/Backend/Domain/Cart/AddCart
+module github.com/EstebanASM/AWS-DECORHOME-SHOP/Backend/Domain/Cart/GetCarts
 
 go 1.23.3
 
