@@ -1,13 +1,11 @@
 // src/services/cart/getCart.ts
 
 export interface CartItem {
-    id: number;
-    product_id: string;
+    productName: string;
     quantity: number;
-    added_at: string;
-    updated_at: string;
+    addedAt: string;
+    productImage: string;
   }
-  
   const API_URL = "http://localhost:8016/getcart";
   
   export const getCartItems = async (): Promise<CartItem[]> => {

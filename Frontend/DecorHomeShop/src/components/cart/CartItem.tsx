@@ -1,7 +1,5 @@
-// src/components/cart/CartItem.tsx
-
 import React from "react";
-import type { CartItem } from "../../services/cart/GetCart"
+import type { CartItem } from "../../services/cart/getCart";
 
 interface CartItemProps {
   item: CartItem;
@@ -9,10 +7,17 @@ interface CartItemProps {
 
 const CartItem: React.FC<CartItemProps> = ({ item }) => {
   return (
-    <div className="border p-4 rounded-lg shadow-md">
-      <p className="text-lg font-semibold">Producto ID: {item.product_id}</p>
-      <p>Cantidad: {item.quantity}</p>
-      <p>Agregado el: {new Date(item.added_at).toLocaleString()}</p>
+    <div className="border p-4 rounded-lg shadow-md flex items-center">
+      <img
+        src={item.productImage}
+        alt={item.productName}
+        className="w-20 h-20 object-cover rounded-md mr-4"
+      />
+      <div>
+        <p className="text-lg font-semibold">{item.productName}</p>
+        <p>Cantidad: {item.quantity}</p>
+        <p>Agregado el: {new Date(item.addedAt).toLocaleString()}</p>
+      </div>
     </div>
   );
 };

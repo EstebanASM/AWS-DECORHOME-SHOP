@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import CreateProduct from "./pages/products/CreateProduct";
 import GetProduct from "./pages/products/GetProduct";
 import UpdateProduct from "./pages/products/UpdateProduct";
+import GetCart from "./pages/cart/cart";
 
 const App: React.FC = () => {
   return (
@@ -17,6 +18,7 @@ const App: React.FC = () => {
             <Route path="/getproduct" element={<GetProduct />} />
             <Route path="/createproduct" element={<CreateProduct />} />
             <Route path="/updateproduct/:id" element={<UpdateProduct />} />
+            <Route path="/cart" element={<GetCart />} />
           </Routes>
         </div>
       </div>

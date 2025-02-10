@@ -1,7 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
+  const [cartCount, setCartCount] = useState<number>(0);
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      setCartCount(cart.length);
+    };
+
+    updateCartCount();
+    window.addEventListener("storage", updateCartCount);
+
+    return () => {
+      window.removeEventListener("storage", updateCartCount);
+    };
+  }, []);
+
   return (
     <nav
       style={{
@@ -38,10 +54,34 @@ const Navbar: React.FC = () => {
             Productos
           </Link>
         </li>
+        <li style={{ position: "relative" }}>
+          <Link to="/cart" style={{ color: "#fff", textDecoration: "none", display: "flex", alignItems: "center" }}>
+            🛒 Carrito
+            {cartCount > 0 && (
+              <span
+                style={{
+                  backgroundColor: "red",
+                  color: "#fff",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: "0.9rem",
+                  position: "absolute",
+                  top: "-8px",
+                  right: "-10px",
+                }}
+              >
+                {cartCount}
+              </span>
+            )}
+          </Link>
+        </li>
       </ul>
     </nav>
   );
 };
 
 export default Navbar;
-
