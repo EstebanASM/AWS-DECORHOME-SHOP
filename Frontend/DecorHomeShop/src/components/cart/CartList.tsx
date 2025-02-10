@@ -1,7 +1,7 @@
 // src/components/cart/CartList.tsx
 
 import React, { useEffect, useState } from "react";
-import { getCartItems, CartItem } from "@/services/cart/getCart";
+import { getCartItems, CartItem } from  "../../services/cart/GetCart"
 import CartItemComponent from "./CartItem";
 
 const CartList: React.FC = () => {
