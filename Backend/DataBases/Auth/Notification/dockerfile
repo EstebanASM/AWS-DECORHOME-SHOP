@@ -1,0 +1,14 @@
+# Imagen oficial de MySQL
+FROM mysql:8.0
+
+# Configuración de variables de entorno para la base de datos
+
+
+# Copiar el script de inicialización
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Exponer el puerto de MySQL
+EXPOSE 3306
+
+# Comando por defecto
+CMD ["mysqld"]

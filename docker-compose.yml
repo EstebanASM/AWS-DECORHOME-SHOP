@@ -1,38 +1,38 @@
 version: "3.9"
+
 services:
   create-product: 
     build:
-      context: ./Backend/Domain/Products/CreateProduct # Ruta al directorio donde está el Dockerfile de la aplicación
+      context: ./Backend/Domain/Products/CreateProduct
       dockerfile: Dockerfile
     ports:
-      - "3000:3000" # Mapea el puerto 3000 del contenedor al host
+      - "3000:3000"
     depends_on:
       - mongo
     networks:
       - app-network
     environment:
       - MONGO_URI=mongodb://mongo:27017/db_products
-    
 
   get-product: 
     build:
-      context: ./Backend/Domain/Products/GetProducts # Ruta al directorio donde está el Dockerfile de la aplicación
+      context: ./Backend/Domain/Products/GetProducts
       dockerfile: Dockerfile
     ports:
-      - "3010:3010" # Mapea el puerto 3010 del contenedor al host
+      - "3010:3010"
     depends_on:
       - mongo
     networks:
       - app-network
     environment:
       - MONGO_URI=mongodb://mongo:27017/db_products
-    
+
   buscar-product: 
     build:
-      context: ./Backend/Domain/Products/GetProductId # Ruta al directorio donde está el Dockerfile de la aplicación
+      context: ./Backend/Domain/Products/GetProductId
       dockerfile: Dockerfile
     ports:
-      - "3013:3013" # Mapea el puerto 3010 del contenedor al host
+      - "3013:3013"
     depends_on:
       - mongo
     networks:
@@ -42,10 +42,10 @@ services:
 
   update-product: 
     build:
-      context: ./Backend/Domain/Products/UpdateProduct # Ruta al directorio donde está el Dockerfile de la aplicación
+      context: ./Backend/Domain/Products/UpdateProduct
       dockerfile: Dockerfile
     ports:
-      - "3012:3012" # Mapea el puerto 3010 del contenedor al host
+      - "3012:3012"
     depends_on:
       - mongo
     networks:
@@ -55,10 +55,10 @@ services:
 
   delete-product: 
     build:
-      context: ./Backend/Domain/Products/DeleteProduct # Ruta al directorio donde está el Dockerfile de la aplicación
+      context: ./Backend/Domain/Products/DeleteProduct
       dockerfile: Dockerfile
     ports:
-      - "3011:3011" # Mapea el puerto 3010 del contenedor al host
+      - "3011:3011"
     depends_on:
       - mongo
     networks:
@@ -68,15 +68,109 @@ services:
 
   mongo:
     build:
-      context: ./Backend/DataBases/products # Ruta al directorio donde está el Dockerfile de MongoDB
+      context: ./Backend/DataBases/products
       dockerfile: Dockerfile
     container_name: mongo
     ports:
-      - "27017:27017" # Mapea el puerto 27017 del contenedor al host
+      - "27017:27017"
     networks:
       - app-network
     volumes:
-      - mongo-data:/data/db # Persiste los datos de MongoDB
+      - mongo-data:/data/db
+
+  auth_db:
+    image: auth_db_image
+    container_name: auth_db_image
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpass
+    ports:
+      - "3307:3306"
+    volumes:
+      - auth_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  notifications_db:
+    image: notifications_db_image
+    container_name: notifications_db_image
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notifications_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: adminpass
+    ports:
+      - "3308:3306"
+    volumes:
+      - notifications_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  login:
+    build:
+      context: ./Backend/Domain/Auth/Login
+      dockerfile: Dockerfile
+    container_name: login_service
+    restart: always
+    environment:
+      DB_HOST: auth_db
+      DB_USER: admin
+      DB_PASSWORD: adminpass
+      DB_NAME: auth_db
+      JWT_SECRET: 'secreto'
+      PORT: 4012
+    ports:
+      - "4012:4012"
+    depends_on:
+      - auth_db
+    networks:
+      - app-network
+
+  register:
+    build:
+      context: ./Backend/Domain/Auth/Register
+      dockerfile: Dockerfile
+    container_name: register_service  # Aquí corregí el nombre del contenedor
+    restart: always
+    environment:
+      DB_HOST: auth_db
+      DB_USER: admin
+      DB_PASSWORD: adminpass
+      DB_NAME: auth_db
+      JWT_SECRET: 'secreto'
+      PORT: 4013
+    ports:
+      - "4013:4013"
+    depends_on:
+      - auth_db
+    networks:
+      - app-network
+
+  recovery:
+    build:
+      context: ./Backend/Domain/Auth/Recovery
+      dockerfile: Dockerfile
+    container_name: recovery_service  # Aquí corregí el nombre del contenedor
+    restart: always
+    environment:
+      DB_HOST: auth_db
+      DB_USER: admin
+      DB_PASSWORD: adminpass
+      DB_NAME: auth_db
+      JWT_SECRET: 'secreto'
+      PORT: 4014
+    ports:
+      - "4014:4014"
+    depends_on:
+      - auth_db
+    networks:
+      - app-network
+
+
 
 networks:
   app-network:
@@ -84,3 +178,5 @@ networks:
 
 volumes:
   mongo-data:
+  auth_data:
+  notifications_data:
