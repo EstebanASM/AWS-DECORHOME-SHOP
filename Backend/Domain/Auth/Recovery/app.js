@@ -87,6 +87,6 @@ app.post('/reset-password', async (req, res) => {
 });
 
 // **4️⃣ Iniciar Servidor**
-const PORT = process.env.PORT || 4014;
+const PORT = process.env.PORT | 4014;
 app.listen(PORT, () => console.log(`Servidor en el puerto ${PORT}`));
 

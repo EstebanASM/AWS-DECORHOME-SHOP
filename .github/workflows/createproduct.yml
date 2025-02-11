@@ -1,0 +1,76 @@
+name: SendChanges-to-EC2
+
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  deploy:
+    name: Deploy to EC2 on test branch push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v2
+
+      - name: Deploy to Server 1
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST4_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
+
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST4_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Actualiza el sistema y Apache
+            sudo apt-get -y update
+            sudo apt-get install -y apache2 php libapache2-mod-php
+            sudo systemctl start apache2
+            sudo systemctl enable apache2
+
+            # Elimina archivos antiguos en el directorio de Apache
+            sudo rm -rf /var/www/html/*
+
+            # Cambia al directorio donde están los archivos clonados
+            cd /home/${{ secrets.USERNAME }}/${{ secrets.TARGET_DIR }}
+
+            # Mueve todos los archivos al directorio de Apache
+            sudo mv * /var/www/html
+
+            # Cambia los permisos para que Apache pueda acceder a los archivos
+            sudo chown -R www-data:www-data /var/www/html
+            sudo chmod -R 755 /var/www/html
+
+            # Reinicia Apache para aplicar los cambios
+            sudo systemctl restart apache2
+
+            # Navega hasta el backend de CreateProduct
+            cd /home/${{ secrets.USERNAME }}/${{ secrets.TARGET_DIR }}/Backend/Domain/Products/CreateProduct
+
+            # Verifica si Docker está instalado, si no, instálalo
+            if ! command -v docker &> /dev/null
+            then
+              echo "Docker no está instalado. Instalándolo ahora..."
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+            fi
+
+            # Verifica si Docker Compose está instalado, si no, instálalo
+            if ! command -v docker-compose &> /dev/null
+            then
+              echo "Docker Compose no está instalado. Instalándolo ahora..."
+              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+
+            # Construye y levanta solo el servicio de CreateProduct
+            sudo docker-compose build create-product
+            sudo docker-compose up -d create-product
