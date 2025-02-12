@@ -1,4 +1,4 @@
-name: Deploy MongoDB to EC2
+name: Deploy MongoDB to EC2 
 
 on:
   push:
@@ -8,9 +8,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/mongo.yml'
-    branches:
-      - "dev1"
-      - "main"
+    branches: ["dev1", "main"]
 
 jobs:
   deploy:
@@ -28,10 +26,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            echo "✅ SSH connection successful"
+            echo "✅ Conexión SSH exitosa con EC2"
 
+            # 1️⃣ Verificar si Docker está instalado
             if ! command -v docker &> /dev/null; then
-              echo "⚙️ Installing Docker..."
+              echo "⚙️ Instalando Docker..."
               sudo yum update -y
               sudo yum install -y docker
               sudo systemctl start docker
@@ -39,20 +38,30 @@ jobs:
               sudo usermod -aG docker $USER
             fi
 
+            # 2️⃣ Crear el directorio de datos de MongoDB si no existe
+            MONGO_DATA_DIR="/home/${{ secrets.EC2_USER }}/mongodb_data"
+            if [ ! -d "$MONGO_DATA_DIR" ]; then
+              echo "📁 Creando directorio de datos de MongoDB..."
+              sudo mkdir -p "$MONGO_DATA_DIR"
+              sudo chown -R $USER:$USER "$MONGO_DATA_DIR"
+            fi
+
+            # 3️⃣ Eliminar contenedor MongoDB anterior si existe
             if [ "$(sudo docker ps -aq -f name=mongo_container)" ]; then
-              echo "🗑 Removing existing MongoDB container..."
+              echo "🗑 Eliminando contenedor existente de MongoDB..."
               sudo docker stop mongo_container
               sudo docker rm mongo_container
             fi
 
-            echo "🚀 Starting MongoDB..."
+            # 4️⃣ Iniciar MongoDB con autenticación habilitada
+            echo "🚀 Iniciando MongoDB..."
             sudo docker run -d \
               --name mongo_container \
               -p 27017:27017 \
               -e MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGODB_USER }} \
               -e MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGODB_PASSWORD }} \
-              -v /home/${{ secrets.EC2_USER }}/mongodb_data:/data/db \
+              -v $MONGO_DATA_DIR:/data/db \
               --restart unless-stopped \
-              mongo
+              mongo --auth --bind_ip 0.0.0.0
 
-            echo "✅ MongoDB successfully deployed on EC2"
+            echo "✅ MongoDB desplegado en EC2 y accesible desde otras instancias"
