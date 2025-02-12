@@ -44,8 +44,9 @@ jobs:
             echo "==> Installing Docker"
             sudo yum update -y
             sudo yum install -y docker
-            sudo service docker start
-            sudo usermod -a -G docker ec2-user
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ec2-user
           fi
 
           echo "Deteniendo y eliminando contenedor previo..."
@@ -58,8 +59,8 @@ jobs:
           echo "Ejecutando nuevo contenedor..."
           sudo docker run -d \
             --name get-products-db \
-            -p 3010:3010 \ # Puerto expuesto de la aplicación
-            -e MONGODB_HOST=${{ secrets.MONGODB_HOST }} \ # MongoDB Host (EC2 o contenedor)
+            -p 3010:3010 \
+            -e MONGODB_HOST=${{ secrets.MONGODB_HOST }} \
             -e MONGODB_USER=${{ secrets.MONGODB_USER }} \
             -e MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }} \
             ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
