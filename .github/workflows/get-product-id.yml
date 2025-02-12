@@ -40,16 +40,28 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
-          echo "Deteniendo y eliminando contenedor previo..."
+          if ! command -v docker &> /dev/null; then
+            echo "⚙️ Instalando Docker..."
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ec2-user
+          fi
+
+          echo "🛑 Deteniendo y eliminando contenedor previo..."
           sudo docker stop get-product-id || true
           sudo docker rm get-product-id || true
 
-          echo "Actualizando imagen desde Docker Hub..."
+          echo "📦 Descargando nueva imagen..."
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/get-product-id:latest
 
-          echo "Ejecutando nuevo contenedor..."
+          echo "🚀 Iniciando contenedor..."
           sudo docker run -d \
             --name get-product-id \
             -p 3013:3013 \
-            -e MONGO_URI="mongodb://${{ secrets.EC2_HOST_MONGODB }}:27017/db_products" \
+            -e MONGO_URI="mongodb://${{ secrets.MONGODB_USER }}:${{ secrets.MONGODB_PASSWORD }}@${{ secrets.EC2_HOST_MONGODB }}:27017/db_products?authSource=admin" \
             ${{ secrets.DOCKER_USERNAME }}/get-product-id:latest
+
+          echo "🔄 Verificando conexión con MongoDB..."
+          sudo docker exec get-product-id mongo --eval 'db.runCommand({ connectionStatus: 1 })'
