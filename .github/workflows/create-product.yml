@@ -1,13 +1,13 @@
-name: AWS Deployment for GetProducts Service
+name: AWS Deployment for CreateProduct Service
 
 on:
   push:
     paths:
-      - 'Backend/Domain/Products/GetProducts/**'
+      - 'Backend/Domain/Products/CreateProduct/**'
     branches: ["dev3"]
   pull_request:
     paths:
-      - 'Backend/Domain/Products/GetProducts/**'
+      - 'Backend/Domain/Products/CreateProduct/**'
     branches: ["dev1", "main"]
 
 jobs:
@@ -25,8 +25,8 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build Backend/Domain/Products/GetProducts/ --file Backend/Domain/Products/GetProducts/Dockerfile \
-          -t ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
+        docker build Backend/Domain/Products/CreateProduct/ --file Backend/Domain/Products/CreateProduct/Dockerfile \
+          -t ${{ secrets.DOCKER_USERNAME }}/create-product:latest
 
   deploy:
     needs: build
@@ -35,7 +35,7 @@ jobs:
     - name: Deploy to AWS EC2
       uses: appleboy/ssh-action@v0.1.8
       with:
-        host: ${{ secrets.EC2_HOST_GET_PRODUCTS }}
+        host: ${{ secrets.EC2_HOST_CREATE_PRODUCT }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
@@ -50,23 +50,15 @@ jobs:
           fi
 
           echo "Deteniendo y eliminando contenedor previo..."
-          sudo docker stop get-products-db || true
-          sudo docker rm get-products-db || true
+          sudo docker stop create-product || true
+          sudo docker rm create-product || true
 
           echo "Actualizando imagen desde Docker Hub..."
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/create-product:latest
 
           echo "Ejecutando nuevo contenedor..."
           sudo docker run -d \
-            --name get-products-db \
-            -p 3010:3010 \
+            --name create-product \
+            -p 3000:3000 \
             -e MONGO_URI="mongodb://${{ secrets.EC2_HOST_MONGODB }}:27017/db_products" \
-            ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
-
-          if sudo docker ps -f name=get-products-db | grep get-products-db; then
-            echo "Contenedor corriendo correctamente."
-          else
-            echo "Error al iniciar el contenedor. Revisa los logs."
-            exit 1
-          fi
-
+            ${{ secrets.DOCKER_USERNAME }}/create-product:latest

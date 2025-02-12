@@ -12,8 +12,9 @@ app.use(bodyParser.json());
 // Middleware para habilitar CORS
 app.use(cors());
 
+
 // MongoDB URI
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/db_products";
+const MONGO_URI = process.env.MONGO_URI || `mongodb://${process.env.MONGODB_HOST}:27017/db_products`;
 
 // Conexión a MongoDB
 mongoose

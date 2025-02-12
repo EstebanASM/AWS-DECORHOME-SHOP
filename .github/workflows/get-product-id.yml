@@ -1,0 +1,55 @@
+name: AWS Deployment for GetProductById Service
+
+on:
+  push:
+    paths:
+      - 'Backend/Domain/Products/GetProductById/**'
+    branches: ["dev3"]
+  pull_request:
+    paths:
+      - 'Backend/Domain/Products/GetProductById/**'
+    branches: ["dev1", "main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker image
+      run: |
+        docker build Backend/Domain/Products/GetProductById/ --file Backend/Domain/Products/GetProductById/Dockerfile \
+          -t ${{ secrets.DOCKER_USERNAME }}/get-product-id:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to AWS EC2
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.EC2_HOST_GET_PRODUCT_ID }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          echo "Deteniendo y eliminando contenedor previo..."
+          sudo docker stop get-product-id || true
+          sudo docker rm get-product-id || true
+
+          echo "Actualizando imagen desde Docker Hub..."
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/get-product-id:latest
+
+          echo "Ejecutando nuevo contenedor..."
+          sudo docker run -d \
+            --name get-product-id \
+            -p 3013:3013 \
+            -e MONGO_URI="mongodb://${{ secrets.EC2_HOST_MONGODB }}:27017/db_products" \
+            ${{ secrets.DOCKER_USERNAME }}/get-product-id:latest
