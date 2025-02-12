@@ -4,45 +4,33 @@ on:
   push:
     paths:
       - 'Backend/Domain/Products/GetProducts/**'
-    branches: ["dev2"]
+    branches: ["dev3"]
   pull_request:
     paths:
-       - 'Backend/Domain/Products/GetProducts/**'
-    branches: ["dev", "main"]
+      - 'Backend/Domain/Products/GetProducts/**'
+    branches: ["dev1", "main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Checkout del repositorio
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-     # Paso 2: Login en Docker Hub
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Paso 3: Construir la imagen Docker usando los secrets
     - name: Build Docker image
       run: |
-        docker build catalog/createProductService/. --file catalog/createProductService/Dockerfile \
-          --build-arg MONGO_URI=${{ secrets.MONGO_URI }} \
-          --build-arg DB_NAME=${{ secrets.DB_NAME }} \
-          --build-arg SERVER_PORT=${{ secrets.SERVER_PORT_CREATE_PRODUCT }} \
-          --build-arg AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID_S3 }} \
-          --build-arg AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_S3 }} \
-          --build-arg S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }} \
-          --build-arg AWS_REGION=${{ secrets.AWS_REGION_S3 }} \
-          -t ${{ secrets.DOCKER_USERNAME }}/create-product-service:latest
-
+        docker build Backend/Domain/Products/GetProducts/ --file Backend/Domain/Products/GetProducts/Dockerfile \
+          -t ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
     steps:
     - name: Deploy to AWS EC2
       uses: appleboy/ssh-action@v0.1.8
@@ -61,23 +49,22 @@ jobs:
           fi
 
           echo "Deteniendo y eliminando contenedor previo..."
-          sudo docker stop get-products-service || true
-          sudo docker rm get-products-service || true
+          sudo docker stop get-products-db || true
+          sudo docker rm get-products-db || true
 
-          echo "Actualizando imagen desde Amazon ECR..."
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
-          sudo docker pull ${{ secrets.AWS_ECR_REGISTRY }}/get-products-service:latest
+          echo "Actualizando imagen desde Docker Hub..."
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
 
-          echo "Ejecutando nuevo contenedor en el puerto ${{ secrets.SERVER_PORT_GET_PRODUCTS }}..."
+          echo "Ejecutando nuevo contenedor..."
           sudo docker run -d \
-            --name get-products-service \
-            -p 80:${{ secrets.SERVER_PORT_GET_PRODUCTS }} \
-            -e MONGO_URI=${{ secrets.MONGO_URI }} \
-            -e DB_NAME=${{ secrets.DB_NAME }} \
-            -e SERVER_PORT=${{ secrets.SERVER_PORT_GET_PRODUCTS }} \
-            ${{ secrets.AWS_ECR_REGISTRY }}/get-products-service:latest
+            --name get-products-db \
+            -p 3010:3010 \ # Puerto expuesto de la aplicación
+            -e MONGODB_HOST=${{ secrets.MONGODB_HOST }} \ # MongoDB Host (EC2 o contenedor)
+            -e MONGODB_USER=${{ secrets.MONGODB_USER }} \
+            -e MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }} \
+            ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
 
-          if sudo docker ps -f name=get-products-service | grep get-products-service; then
+          if sudo docker ps -f name=get-products-db | grep get-products-db; then
             echo "Contenedor corriendo correctamente."
           else
             echo "Error al iniciar el contenedor. Revisa los logs."
