@@ -14,26 +14,5 @@
     "category": "Muebles",
     "stock": 20,
     "image": "https://example.com/images/mesa-centro.jpg"
-  },
-  {
-    "name": "Silla de Oficina",
-    "description": "Silla ergonómica con soporte lumbar ajustable.",
-    "price": 180,
-    "category": "Oficina",
-    "stock": 25
-  },
-  {
-    "name": "Cama King Size",
-    "description": "Cama grande y cómoda con marco de madera maciza.",
-    "price": 450,
-    "category": "Dormitorio",
-    "stock": 10
-  },
-  {
-    "name": "Lámpara de Pie",
-    "description": "Lámpara de pie con diseño minimalista y luz LED.",
-    "price": 60,
-    "category": "Decoración",
-    "stock": 30
   }
 ]
