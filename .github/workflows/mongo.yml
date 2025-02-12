@@ -4,16 +4,16 @@ on:
   push:
     paths:
       - '.github/workflows/mongo.yml'
-      - 'Backend/Databases/products/products.json'
-      - 'Backend/Databases/products/init-mongo.sh'
-      - 'Backend/Databases/products/dockerfile'
+      - 'Backend/DataBases/products/products.json'
+      - 'Backend/DataBases/products/init-mongo.sh'
+      - 'Backend/DataBases/products/dockerfile'
     branches: [ "dev3" ]
   pull_request:
     paths:
       - '.github/workflows/mongo.yml'
-      - 'Backend/Databases/products/products.json'
-      - 'Backend/Databases/products/init-mongo.sh'
-      - 'Backend/Databases/products/dockerfile'
+      - 'Backend/DataBases/products/products.json'
+      - 'Backend/DataBases/products/init-mongo.sh'
+      - 'Backend/DataBases/products/dockerfile'
     branches:
       - "dev1"
       - "main"
@@ -76,9 +76,9 @@ jobs:
 
             # 5️⃣ Subir archivos a la instancia EC2 (cambio de ruta)
             echo "📂 Subiendo archivos..."
-            scp -o StrictHostKeyChecking=no Backend/Databases/products/products.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/products.json
-            scp -o StrictHostKeyChecking=no Backend/Databases/products/init-mongo.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/init-mongo.sh
-            scp -o StrictHostKeyChecking=no Backend/Databases/products/dockerfile ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/dockerfile
+            scp -o StrictHostKeyChecking=no Backend/DataBases/products/products.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/products.json
+            scp -o StrictHostKeyChecking=no Backend/DataBases/products/init-mongo.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/init-mongo.sh
+            scp -o StrictHostKeyChecking=no Backend/DataBases/products/dockerfile ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/dockerfile
 
             # 6️⃣ Asegurar permisos de ejecución en `init-mongo.sh`
             echo "🔑 Configurando permisos para init-mongo.sh..."
