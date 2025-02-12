@@ -1,0 +1,6 @@
+fastapi==0.95.2
+uvicorn==0.23.2
+ariadne==0.17.0
+sqlalchemy==2.0.18
+pydantic==1.11.1
+psycopg2-binary==2.9.3  # Si estás utilizando PostgreSQL

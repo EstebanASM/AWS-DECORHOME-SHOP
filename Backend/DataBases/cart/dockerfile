@@ -1,0 +1,12 @@
+# Usar la imagen oficial de MySQL
+FROM mysql:8.0
+
+# Copiar el archivo .env y init.sql al contenedor
+COPY .env /etc/environment
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Exponer el puerto de MySQL
+EXPOSE 3306
+
+# Iniciar MySQL
+CMD ["mysqld"]

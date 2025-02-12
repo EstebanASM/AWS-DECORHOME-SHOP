@@ -5,21 +5,26 @@ import Home from "./pages/Home";
 import CreateProduct from "./pages/products/CreateProduct";
 import GetProduct from "./pages/products/GetProduct";
 import UpdateProduct from "./pages/products/UpdateProduct";
+import GetCart from "./pages/cart/cart";
 
 const App: React.FC = () => {
   return (
     <Router>
-      <Navbar />
-      <div style={{ padding: "1rem" }}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/getproduct" element={<GetProduct />} />
-          <Route path="/createproduct" element={<CreateProduct />} />
-          <Route path="/updateproduct/:id" element={<UpdateProduct />} />
-        </Routes>
+      <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+        <Navbar />
+        <div style={{ flex: 1, padding: "2rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/getproduct" element={<GetProduct />} />
+            <Route path="/createproduct" element={<CreateProduct />} />
+            <Route path="/updateproduct/:id" element={<UpdateProduct />} />
+            <Route path="/cart" element={<GetCart />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );
 };
 
 export default App;
+

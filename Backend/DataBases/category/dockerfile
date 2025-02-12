@@ -1,0 +1,13 @@
+# Usa la imagen oficial de PostgreSQL
+FROM postgres:latest
+
+
+# Copia los archivos de inicialización SQL (si existen)
+COPY init-db.sql /docker-entrypoint-initdb.d/
+COPY insert-data.sql /docker-entrypoint-initdb.d/
+
+# Exponer el puerto 5432 por defecto
+EXPOSE 5432
+
+# Comando por defecto para ejecutar PostgreSQL
+CMD ["postgres"]
