@@ -4,16 +4,16 @@ on:
   push:
     paths:
       - '.github/workflows/mongo.yml'
-      - 'Backend/DataBases/products.json'
-      - 'Backend/DataBases/init-mongo.sh'
-      - 'Backend/DataBases/Dockerfile'
+      - 'Backend/Databases/products/products.json'
+      - 'Backend/Databases/products/init-mongo.sh'
+      - 'Backend/Databases/products/dockerfile'
     branches: [ "dev3" ]
   pull_request:
     paths:
       - '.github/workflows/mongo.yml'
-      - 'Backend/DataBases/products.json'
-      - 'Backend/DataBases/init-mongo.sh'
-      - 'Backend/DataBases/Dockerfile'
+      - 'Backend/Databases/products/products.json'
+      - 'Backend/Databases/products/init-mongo.sh'
+      - 'Backend/Databases/products/dockerfile'
     branches:
       - "dev1"
       - "main"
@@ -64,33 +64,37 @@ jobs:
             # 3️⃣ Verificar la instalación de MongoDB Shell
             mongo --version
 
-            # 4️⃣ Crear directorio de datos si no existe
+            # 4️⃣ Crear directorios si no existen
             MONGO_DATA_DIR="/home/${{ secrets.EC2_USER }}/mongodb_data"
-            if [ ! -d "$MONGO_DATA_DIR" ]; then
-              echo "📁 Creando directorio de datos de MongoDB..."
-              sudo mkdir -p "$MONGO_DATA_DIR"
-              sudo chown -R $USER:$USER "$MONGO_DATA_DIR"
-            fi
+            FILES_DIR="/home/${{ secrets.EC2_USER }}/products"
 
-            # 5️⃣ Subir archivos necesarios a la instancia EC2
+            echo "📁 Creando directorios necesarios..."
+            sudo mkdir -p "$MONGO_DATA_DIR"
+            sudo mkdir -p "$FILES_DIR"
+            sudo chown -R $USER:$USER "$MONGO_DATA_DIR"
+            sudo chown -R $USER:$USER "$FILES_DIR"
+
+            # 5️⃣ Subir archivos a la instancia EC2 (cambio de ruta)
             echo "📂 Subiendo archivos..."
-            scp -o StrictHostKeyChecking=no Backend/DataBases/products.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:/home/${{ secrets.EC2_USER }}/products.json
-            scp -o StrictHostKeyChecking=no Backend/DataBases/init-mongo.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:/home/${{ secrets.EC2_USER }}/init-mongo.sh
-            scp -o StrictHostKeyChecking=no Backend/DataBases/Dockerfile ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:/home/${{ secrets.EC2_USER }}/Dockerfile
+            scp -o StrictHostKeyChecking=no Backend/Databases/products/products.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/products.json
+            scp -o StrictHostKeyChecking=no Backend/Databases/products/init-mongo.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/init-mongo.sh
+            scp -o StrictHostKeyChecking=no Backend/Databases/products/dockerfile ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:$FILES_DIR/dockerfile
 
-            # 6️⃣ Verificar si el contenedor de MongoDB existe
+            # 6️⃣ Asegurar permisos de ejecución en `init-mongo.sh`
+            echo "🔑 Configurando permisos para init-mongo.sh..."
+            sudo chmod +x $FILES_DIR/init-mongo.sh
+
+            # 7️⃣ Verificar si el contenedor de MongoDB existe y eliminarlo si es necesario
             if sudo docker ps -a --format '{{.Names}}' | grep -q "mongo_container"; then
-              echo "🔄 MongoDB ya está corriendo. Reiniciándolo..."
+              echo "🛑 Eliminando contenedor existente de MongoDB..."
               sudo docker stop mongo_container
               sudo docker rm mongo_container
-            else
-              echo "🚀 No se encontró el contenedor de MongoDB. Creando uno nuevo..."
             fi
 
-            # 7️⃣ Construir y desplegar MongoDB en la instancia EC2
+            # 8️⃣ Construir y desplegar MongoDB en la instancia EC2
             echo "🛠 Construyendo imagen Docker para MongoDB..."
-            sudo docker build -t mongo-custom -f /home/${{ secrets.EC2_USER }}/Dockerfile /home/${{ secrets.EC2_USER }}
-            
+            sudo docker build -t mongo-custom -f $FILES_DIR/dockerfile $FILES_DIR
+
             echo "🚀 Iniciando nuevo contenedor de MongoDB..."
             sudo docker run -d \
               --name mongo_container \
@@ -101,15 +105,15 @@ jobs:
               --restart unless-stopped \
               mongo-custom
 
-            # 8️⃣ Esperar para asegurarse de que MongoDB arranca correctamente
+            # 9️⃣ Esperar 15 segundos para la inicialización de MongoDB
             echo "⏳ Esperando 15 segundos para la inicialización de MongoDB..."
             sleep 15
 
-            # 9️⃣ Ejecutar `init-mongo.sh` para importar datos solo si es necesario
-            echo "🔄 Ejecutando script de importación de datos..."
-            sudo bash /home/${{ secrets.EC2_USER }}/init-mongo.sh
+            # 🔟 Ejecutar `init-mongo.sh` dentro del contenedor de MongoDB
+            echo "🔄 Ejecutando script de importación de datos dentro del contenedor..."
+            sudo docker exec mongo_container bash -c "/products/init-mongo.sh"
 
-            # 🔟 Verificar datos en MongoDB
+            # 11️⃣ Verificar si los datos están en MongoDB
             echo "🔎 Verificando si los datos están en MongoDB..."
             mongo --host 127.0.0.1 -u "${{ secrets.MONGODB_USER }}" -p "${{ secrets.MONGODB_PASSWORD }}" --authenticationDatabase admin --eval "use db_products; db.products.find().pretty();"
 
