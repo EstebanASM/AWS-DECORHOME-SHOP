@@ -1,7 +1,7 @@
 # Usar la imagen oficial de MongoDB como base
 FROM mongo:latest
 
-# Configuración del contenedor
+# Crear un directorio de trabajo dentro del contenedor
 WORKDIR /data
 
 # Copiar los archivos de datos y el script de inicialización
@@ -15,4 +15,4 @@ RUN chmod +x /docker-entrypoint-initdb.d/init-mongo.sh
 EXPOSE 27017
 
 # Comando de inicio del contenedor
-CMD ["mongod", "--bind_ip_all"]
+CMD ["mongod", "--bind_ip_all", "--auth"]
