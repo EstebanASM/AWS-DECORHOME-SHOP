@@ -60,8 +60,7 @@ jobs:
           sudo docker run -d \
             --name get-products-db \
             -p 3010:3010 \
-            -e MONGO_URI="mongodb://mongo_container:27017/db_products" \
-            --network get-products-network \
+            -e MONGO_URI="mongodb://${{ secrets.EC2_HOST_MONGODB }}:27017/db_products" \
             ${{ secrets.DOCKER_USERNAME }}/get-products-db:latest
 
           if sudo docker ps -f name=get-products-db | grep get-products-db; then

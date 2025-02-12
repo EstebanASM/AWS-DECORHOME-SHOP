@@ -6,8 +6,18 @@ import { getCategoryById } from "../../services/categories/getCategoryById";
 import { Grid, Button, Typography, Box } from '@mui/material';
 import AddToCartButton from '../../components/cart/AddToCartButton'; // Importar el botón de añadir al carrito
 
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  stock: number;
+  image: string;
+}
+
 const Home: React.FC = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]); // Tipo definido para productos
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +28,7 @@ const Home: React.FC = () => {
       try {
         const data = await getProducts();
         setProducts(data);
-  
+
         // Obtener los nombres de las categorías
         const categoryNames: { [key: string]: string } = {};
 
@@ -34,17 +44,16 @@ const Home: React.FC = () => {
             }
           })
         );
-  
+
         // Establecer las categorías solo cuando todos los datos estén listos
         setCategories(categoryNames);
       } catch (error: any) {
         setError(error.message);
       }
     };
-  
+
     fetchProducts();
   }, []);
-  
 
   const handleCheckboxChange = (productId: string) => {
     const updatedSelectedProducts = new Set(selectedProducts);
@@ -83,8 +92,6 @@ const Home: React.FC = () => {
       }
     }
   };
-
-  const isNoProductSelected = selectedProducts.size === 0;
   const isSingleProductSelected = selectedProducts.size === 1;
   const isMultipleProductsSelected = selectedProducts.size > 0;
   const selectedProductId = Array.from(selectedProducts)[0];
