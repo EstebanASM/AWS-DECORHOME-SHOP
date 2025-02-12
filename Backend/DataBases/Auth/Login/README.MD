@@ -1,0 +1,100 @@
+# Authentication MYSQL
+
+This README provides detailed instructions for setting up, building, and running the authentication database in MySQL using Docker. 🚀
+
+## Environment Variables
+
+The following environment variables are required for the database configuration:
+
+```env
+MYSQL_ROOT_PASSWORD=root
+MYSQL_DATABASE=auth_db
+MYSQL_USER=admin
+MYSQL_PASSWORD=adminpass
+```
+
+## Dockerfile
+
+The `Dockerfile` for MySQL sets up the database with an initialization script:
+
+```dockerfile
+# Official MySQL image
+FROM mysql:8.0
+
+# Set environment variables for the database
+
+# Copy the initialization script
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Expose MySQL port
+EXPOSE 3306
+
+# Default command
+CMD ["mysqld"]
+```
+
+## Database Initialization Script (`init.sql`)
+
+The `init.sql` script creates the authentication database and required tables:
+
+```sql
+CREATE DATABASE IF NOT EXISTS auth_db;
+USE auth_db;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  role ENUM('admin', 'user') DEFAULT 'user'
+);
+
+CREATE TABLE IF NOT EXISTS passwordrecovery (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  token VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+INSERT INTO users (username, password, email, role)
+VALUES ('admin', '12345', 'admin@example.com', 'admin'),
+       ('user', 'password', 'user@example.com', 'user');
+```
+
+## Running MySQL with Docker
+
+To build and run the MySQL container, follow these steps:
+
+1. **Build the Docker image:**
+   ```sh
+   docker build -t mysql-auth-db .
+   ```
+
+2. **Run the container:**
+   ```sh
+   docker run -d --name mysql-auth-container \
+     -e MYSQL_ROOT_PASSWORD=root \
+     -e MYSQL_DATABASE=auth_db \
+     -e MYSQL_USER=admin \
+     -e MYSQL_PASSWORD=adminpass \
+     -p 3306:3306 mysql-auth-db
+   ```
+
+## Accessing the Database
+
+To connect to the MySQL database inside the container:
+
+```sh
+docker exec -it mysql-auth-container mysql -uadmin -padminpass auth_db
+```
+
+## Notes
+- Ensure Docker is installed and running before executing the commands.
+- The default MySQL port `3306` is exposed for external connections.
+- Passwords in the `init.sql` script should be hashed for better security.
+
+---
+
+This setup provides a simple and efficient way to manage user authentication with MySQL inside a Docker container. 🎯
+
