@@ -1,19 +1,13 @@
-name: Deploy MongoDB to EC2
+name: Deploy MongoDB to EC2 
 
 on:
   push:
     paths:
       - '.github/workflows/mongo.yml'
-      - 'Backend/DataBases/products/products.json'
-      - 'Backend/DataBases/products/init-mongo.sh'
-      - 'Backend/DataBases/products/Dockerfile'
     branches: [ "dev3" ]
   pull_request:
     paths:
       - '.github/workflows/mongo.yml'
-      - 'Backend/DataBases/products/products.json'
-      - 'Backend/DataBases/products/init-mongo.sh'
-      - 'Backend/DataBases/products/Dockerfile'
     branches: ["dev1", "main"]
 
 jobs:
@@ -44,48 +38,30 @@ jobs:
               sudo usermod -aG docker $USER
             fi
 
-            # 2️⃣ Crear directorio de MongoDB si no existe
-            MONGO_DIR="/home/${{ secrets.EC2_USER }}/mongodb"
-            if [ ! -d "$MONGO_DIR" ]; then
-              echo "📁 Creando directorio de MongoDB..."
-              sudo mkdir -p "$MONGO_DIR"
-              sudo chown -R $USER:$USER "$MONGO_DIR"
+            # 2️⃣ Crear el directorio de datos de MongoDB si no existe
+            MONGO_DATA_DIR="/home/${{ secrets.EC2_USER }}/mongodb_data"
+            if [ ! -d "$MONGO_DATA_DIR" ]; then
+              echo "📁 Creando directorio de datos de MongoDB..."
+              sudo mkdir -p "$MONGO_DATA_DIR"
+              sudo chown -R $USER:$USER "$MONGO_DATA_DIR"
             fi
 
-            # 3️⃣ Copiar archivos necesarios a la instancia EC2
-            echo "📂 Copiando archivos..."
-            scp -o StrictHostKeyChecking=no Backend/DataBases/products/products.json ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:/home/${{ secrets.EC2_USER }}/mongodb/products.json
-            scp -o StrictHostKeyChecking=no Backend/DataBases/products/init-mongo.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:/home/${{ secrets.EC2_USER }}/mongodb/init-mongo.sh
-            scp -o StrictHostKeyChecking=no Backend/DataBases/products/Dockerfile ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST_MONGODB }}:/home/${{ secrets.EC2_USER }}/mongodb/Dockerfile
-
-            # 4️⃣ Eliminar contenedor previo si existe
-            if sudo docker ps -a --format '{{.Names}}' | grep -q "mongo_container"; then
-              echo "🛑 Eliminando contenedor MongoDB existente..."
+            # 3️⃣ Eliminar contenedor MongoDB anterior si existe
+            if [ "$(sudo docker ps -aq -f name=mongo_container)" ]; then
+              echo "🗑 Eliminando contenedor existente de MongoDB..."
               sudo docker stop mongo_container
               sudo docker rm mongo_container
             fi
 
-            # 5️⃣ Construir la imagen personalizada de MongoDB
-            echo "🛠 Construyendo imagen Docker para MongoDB..."
-            cd /home/${{ secrets.EC2_USER }}/mongodb
-            sudo docker build -t mongo-custom .
-
-            # 6️⃣ Iniciar MongoDB con autenticación y conexión remota
-            echo "🚀 Iniciando contenedor MongoDB..."
+            # 4️⃣ Iniciar MongoDB con autenticación habilitada
+            echo "🚀 Iniciando MongoDB..."
             sudo docker run -d \
               --name mongo_container \
               -p 27017:27017 \
               -e MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGODB_USER }} \
               -e MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGODB_PASSWORD }} \
-              -v $MONGO_DIR:/data/db \
+              -v $MONGO_DATA_DIR:/data/db \
               --restart unless-stopped \
-              mongo-custom
+              mongo --auth --bind_ip 0.0.0.0
 
-            echo "⏳ Esperando a que MongoDB inicie..."
-            sleep 10
-
-            # 7️⃣ Verificar conexión con MongoDB
-            echo "🔍 Verificando conexión..."
-            sudo docker exec mongo_container mongo --eval "db.runCommand({ connectionStatus: 1 })"
-
-            echo "✅ Despliegue completado correctamente."
+            echo "✅ MongoDB desplegado en EC2 y accesible desde otras instancias"
