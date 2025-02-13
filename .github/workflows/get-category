@@ -1,0 +1,82 @@
+name: AWS Deployment for GetCategory Service
+
+on:
+  push:
+    paths:
+      - 'Backend/Domain/Category/GetCategory/src/**'  # Ruta actualizada
+    branches: ["dev3"]
+  pull_request:
+    paths:
+      - 'Backend/Domain/Category/GetCategory/src/**'  # Ruta actualizada
+    branches: ["dev1", "main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build Docker image
+      run: |
+        echo "🔧 Iniciando la construcción de la imagen Docker..."
+        docker build -f Backend/Domain/Category/GetCategory/src/Dockerfile -t get-category-db:latest .  # Ruta actualizada
+        echo "🛠 Imagen Docker construida correctamente."
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to AWS EC2
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.EC2_HOST_GET_CATEGORY }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          echo "🚀 Conectando a EC2 para desplegar GetCategory"
+          
+          echo "🔧 Verificando si Docker está instalado..."
+          if ! command -v docker &> /dev/null; then
+            echo "⚙️ Instalando Docker"
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ec2-user
+          else
+            echo "✅ Docker ya está instalado."
+          fi
+
+          # Eliminar contenedor anterior
+          echo "🛑 Deteniendo contenedor anterior..."
+          sudo docker stop get-category-db || true
+          sudo docker rm get-category-db || true
+
+          echo "📦 Descargando nueva imagen desde Docker Hub..."
+          sudo docker pull get-category-db:latest
+
+          echo "🚀 Iniciando el contenedor GetCategory..."
+          sudo docker run -d \
+            --name get-category-db \
+            -p 8002:8002 \
+            -e DATABASE_URL="postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ secrets.RDS_HOST }}:5432/${{ secrets.DB_NAME }}" \
+            get-category-db:latest
+
+          echo "🔄 Verificando conexión con PostgreSQL..."
+          sudo docker exec get-category-db psql -U ${{ secrets.DB_USER }} -d ${{
+            secrets.DB_NAME }} -c 'SELECT 1'
+
+          if sudo docker ps -f name=get-category-db | grep get-category-db; then
+            echo "✅ Contenedor corriendo correctamente."
+          else
+            echo "❌ Error al iniciar el contenedor. Revisa los logs."
+            exit 1
+          fi
