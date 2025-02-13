@@ -1,10 +1,10 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import os
 
-# URL de conexión a la base de datos
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://admin:1753791003@localhost:5432/db_categories")
+# URL de conexión de la base de datos PostgreSQL desde la variable de entorno
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://admin:ksdkosndk1212..@categorydb.cvzr7pomd22b.us-east-1.rds.amazonaws.com:5432/categorydb")
 
 # Crear el motor de la base de datos
 engine = create_engine(DATABASE_URL)
