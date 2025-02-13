@@ -34,7 +34,7 @@ const productSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", productSchema);
 
 // Ruta para crear un producto
-app.post("/products", async (req, res) => {
+app.post("/create-products", async (req, res) => {
   try {
     const newProduct = new Product(req.body); // Crear una instancia del modelo con los datos enviados
     const savedProduct = await newProduct.save(); // Guardar en la base de datos
