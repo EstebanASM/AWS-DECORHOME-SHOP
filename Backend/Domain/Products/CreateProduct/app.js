@@ -13,7 +13,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // MongoDB URI
-const MONGO_URI = process.env.MONGO_URI || `mongodb://${process.env.MONGODB_HOST}:27017/db_products`;
+const MONGO_URI = process.env.MONGO_URI || `mongodb://admin:supersecurepassword@${process.env.MONGODB_HOST}:27017/db_products?authSource=admin`;
+
 // Conexión a MongoDB
 mongoose
   .connect(MONGO_URI)
@@ -33,7 +34,7 @@ const productSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", productSchema);
 
 // Ruta para crear un producto
-app.post("/products", async (req, res) => {
+app.post("/create-products", async (req, res) => {
   try {
     const newProduct = new Product(req.body); // Crear una instancia del modelo con los datos enviados
     const savedProduct = await newProduct.save(); // Guardar en la base de datos

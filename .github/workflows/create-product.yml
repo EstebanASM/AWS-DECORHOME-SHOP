@@ -3,11 +3,11 @@ name: AWS Deployment for CreateProduct Service
 on:
   push:
     paths:
-      - 'Backend/Domain/Products/CreateProduct/**'
+      - 'Backend/Domain/Products/CreateProduct/**'  # Solo se ejecuta cuando hay cambios en esta carpeta
     branches: ["dev3"]
   pull_request:
     paths:
-      - 'Backend/Domain/Products/CreateProduct/**'
+      - 'Backend/Domain/Products/CreateProduct/**'  
     branches: ["dev1", "main"]
 
 jobs:
@@ -25,8 +25,10 @@ jobs:
 
     - name: Build Docker image
       run: |
+        echo "🔧 Iniciando la construcción de la imagen Docker..."
         docker build Backend/Domain/Products/CreateProduct/ --file Backend/Domain/Products/CreateProduct/Dockerfile \
           -t ${{ secrets.DOCKER_USERNAME }}/create-product:latest
+        echo "🛠 Imagen Docker construida correctamente."
 
   deploy:
     needs: build
@@ -40,25 +42,42 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
+          echo "🚀 Conectando a EC2 para desplegar CreateProduct"
+          
+          echo "🔧 Verificando si Docker está instalado..."
           if ! command -v docker &> /dev/null; then
-            echo "==> Installing Docker"
+            echo "⚙️ Instalando Docker"
             sudo yum update -y
             sudo yum install -y docker
             sudo systemctl start docker
             sudo systemctl enable docker
             sudo usermod -aG docker ec2-user
+          else
+            echo "✅ Docker ya está instalado."
           fi
 
-          echo "Deteniendo y eliminando contenedor previo..."
+          # Eliminar contenedor anterior
+          echo "🛑 Deteniendo contenedor anterior..."
           sudo docker stop create-product || true
           sudo docker rm create-product || true
 
-          echo "Actualizando imagen desde Docker Hub..."
+          echo "📦 Descargando nueva imagen desde Docker Hub..."
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/create-product:latest
 
-          echo "Ejecutando nuevo contenedor..."
+          echo "🚀 Iniciando el contenedor CreateProduct..."
           sudo docker run -d \
             --name create-product \
             -p 3000:3000 \
-            -e MONGO_URI="mongodb://${{ secrets.EC2_HOST_MONGODB }}:27017/db_products" \
+            -e MONGO_URI="mongodb://${{ secrets.MONGODB_USER }}:${{ secrets.MONGODB_PASSWORD }}@${{ secrets.EC2_HOST_MONGODB }}:27017/db_products?authSource=admin" \
             ${{ secrets.DOCKER_USERNAME }}/create-product:latest
+
+          echo "🔄 Verificando conexión con MongoDB..."
+          sudo docker exec create-product mongo --eval 'db.runCommand({ connectionStatus: 1 })'
+
+          if sudo docker ps -f name=create-product | grep create-product; then
+            echo "✅ Contenedor corriendo correctamente."
+          else
+            echo "❌ Error al iniciar el contenedor. Revisa los logs."
+            exit 1
+          fi
+

@@ -1,0 +1,6 @@
+fastapi
+ariadne
+sqlalchemy
+psycopg2-binary
+uvicorn
+starlette

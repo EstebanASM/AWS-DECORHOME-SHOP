@@ -1,4 +1,3 @@
-// src/pages/products/CreateProduct.tsx
 import React, { useState, useEffect } from "react";
 import ProductForm from "../../components/products/ProductForm";
 import { createProduct } from "../../services/products/CreateProduct";
@@ -26,7 +25,7 @@ const CreateProduct: React.FC = () => {
   const handleProductSubmit = async (product: {
     name: string;
     price: number;
-    description: string;
+    description: string;  // Se añadió el campo description
     category: string;
     stock: number;
     image: string;

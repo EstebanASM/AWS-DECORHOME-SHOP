@@ -4,7 +4,7 @@ FROM node:18
 # Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copia el archivo package.json y package-lock.json para instalar las dependencias
+# Copia los archivos de dependencias para instalar primero las dependencias
 COPY package*.json ./
 
 # Instala las dependencias de la aplicación
@@ -13,8 +13,8 @@ RUN npm install
 # Copia todo el contenido del proyecto al contenedor
 COPY . .
 
-# Expone el puerto en el que Vite correrá (por defecto, Vite corre en el 5173)
+# Expone el puerto en el que Vite corre (5173 por defecto)
 EXPOSE 5173
 
-# Comando para iniciar la aplicación en modo de desarrollo
-CMD ["npm", "run", "dev"]
+# Comando para iniciar la aplicación en modo de desarrollo (en tu entorno de contenedor)
+CMD ["npm", "run", "dev", "--", "--host"]
