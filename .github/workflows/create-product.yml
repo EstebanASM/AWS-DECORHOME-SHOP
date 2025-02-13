@@ -3,11 +3,11 @@ name: AWS Deployment for CreateProduct Service
 on:
   push:
     paths:
-      - 'Backend/Domain/Products/CreateProduct/**'
+      - 'Backend/Domain/Products/CreateProduct/**'  # Solo se ejecuta cuando hay cambios en esta carpeta
     branches: ["dev3"]
   pull_request:
     paths:
-      - 'Backend/Domain/Products/CreateProduct/**'
+      - 'Backend/Domain/Products/CreateProduct/**'  # Solo se ejecuta cuando hay cambios en esta carpeta
     branches: ["dev1", "main"]
 
 jobs:
