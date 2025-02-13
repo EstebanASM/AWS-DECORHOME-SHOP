@@ -1,4 +1,3 @@
-// src/components/products/ProductForm.tsx
 import React, { useState } from "react";
 import "../../App.css";
 
@@ -6,6 +5,7 @@ interface ProductFormProps {
   onSubmit: (product: {
     name: string;
     price: number;
+    description: string; // Añadido
     category: string;
     stock: number;
     image: string;
@@ -17,6 +17,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
   const [product, setProduct] = useState({
     name: "",
     price: 0,
+    description: "", // Añadido
     category: "",
     stock: 0,
     image: "",
@@ -33,7 +34,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
     e.preventDefault();
 
     // Validaciones
-    if (!product.name || !product.price || !product.category) {
+    if (!product.name || !product.price || !product.category || !product.description) {
       setMessage("Por favor, completa todos los campos obligatorios.");
       return;
     }
@@ -56,6 +57,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
     setProduct({
       name: "",
       price: 0,
+      description: "", // Limpiar descripción
       category: "",
       stock: 0,
       image: "",
@@ -100,6 +102,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
         </div>
         
         <div className="form-group">
+          <label htmlFor="description">Descripción:</label> {/* Añadido */}
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Descripción del producto"
+            value={product.description}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
           <label htmlFor="category">Categoría:</label>
           <select
             name="category"
@@ -108,7 +122,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, categories }) => {
             required
           >
             <option value="">Seleccionar Categoría</option>
-            {/* Verifica que categories tenga elementos antes de llamar map */}
             {categories.length > 0 ? (
               categories.map((category) => (
                 <option key={category.id} value={category.id}>
