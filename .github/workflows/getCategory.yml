@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build Backend/Domain/Category/GetCategory/ --file Backend/Domain/Category/GetCategory/Dockerfile \
+          docker build Backend/Domain/Category/GetCategory/src/ --file Backend/Domain/Category/GetCategory/src/Dockerfile \
             -t ${{ secrets.DOCKER_USERNAME }}/get-category:latest
 
   deploy:
