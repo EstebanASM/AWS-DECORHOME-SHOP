@@ -1,50 +1,56 @@
-# React + TypeScript + Vite
+# DecorHomeShop - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**DecorHomeShop** is a modern online store built with **React**, **TypeScript**, and managed using **Vite**. It allows users to explore and purchase home decor products. This frontend communicates with a backend to manage products, categories, and shopping carts, providing a smooth and fast user experience.
 
-Currently, two official plugins are available:
+## 🚀 Installation and Running
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Follow these steps to start the project in your local environment:
 
-## Expanding the ESLint configuration
+### 1. Clone the repository
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+git clone https://github.com/EstebanASM/AWS-DECORHOME-SHOP.git
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+Install all necessary dependencies using npm:
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```bash
+npm install
 ```
+
+### 3. Run the development server
+
+Start the development server to see the application in action:
+
+```bash
+npm run dev
+```
+
+The frontend will run at http://localhost:(or on the configured port).
+
+## 🌟 Features
+
+- **Intuitive Interface**: Easy and fast navigation to explore home decor products.
+- **Cart Management**: Dynamically add and remove products from the shopping cart.
+- **Product CRUD**: Full functionalities to create, read, update, and delete products from the backend.
+- **Product Categories**: Organize products by categories to facilitate searching.
+
+## 🛠 Technologies Used
+
+- **React**: For a dynamic and reactive user experience.
+- **TypeScript**: Provides static typing for enhanced code safety and maintenance.
+- **Vite**: Fast and optimized development tool for React.
+
+## 📦 Backend Services
+
+The frontend connects with the following backend services:
+
+- **Shopping Cart**: Manages cart items, allowing adding, removing, and updating products.
+- **Categories**: Handles categories to organize products.
+- **Products**: CRUD operations for comprehensive product management in the store.
+
+## 📌 Additional Configuration
+
+- Ensure the backend is up and running before testing the frontend application.
