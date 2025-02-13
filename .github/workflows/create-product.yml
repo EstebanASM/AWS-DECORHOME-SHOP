@@ -25,8 +25,10 @@ jobs:
 
     - name: Build Docker image
       run: |
+        echo "🔧 Iniciando la construcción de la imagen Docker..."
         docker build Backend/Domain/Products/CreateProduct/ --file Backend/Domain/Products/CreateProduct/Dockerfile \
           -t ${{ secrets.DOCKER_USERNAME }}/create-product:latest
+        echo "🛠 Imagen Docker construida correctamente."
 
   deploy:
     needs: build
@@ -40,23 +42,29 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 22
         script: |
+          echo "🚀 Conectando a EC2 para desplegar CreateProduct"
+          
+          echo "🔧 Verificando si Docker está instalado..."
           if ! command -v docker &> /dev/null; then
-            echo "⚙️ Instalando Docker..."
+            echo "⚙️ Instalando Docker"
             sudo yum update -y
             sudo yum install -y docker
             sudo systemctl start docker
             sudo systemctl enable docker
             sudo usermod -aG docker ec2-user
+          else
+            echo "✅ Docker ya está instalado."
           fi
 
-          echo "🛑 Deteniendo y eliminando contenedor previo..."
+          # Eliminar contenedor anterior
+          echo "🛑 Deteniendo contenedor anterior..."
           sudo docker stop create-product || true
           sudo docker rm create-product || true
 
-          echo "📦 Descargando nueva imagen..."
+          echo "📦 Descargando nueva imagen desde Docker Hub..."
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/create-product:latest
 
-          echo "🚀 Iniciando contenedor..."
+          echo "🚀 Iniciando el contenedor CreateProduct..."
           sudo docker run -d \
             --name create-product \
             -p 3000:3000 \
@@ -65,3 +73,10 @@ jobs:
 
           echo "🔄 Verificando conexión con MongoDB..."
           sudo docker exec create-product mongo --eval 'db.runCommand({ connectionStatus: 1 })'
+
+          if sudo docker ps -f name=create-product | grep create-product; then
+            echo "✅ Contenedor corriendo correctamente."
+          else
+            echo "❌ Error al iniciar el contenedor. Revisa los logs."
+            exit 1
+          fi
