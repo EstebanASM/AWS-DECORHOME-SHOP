@@ -13,7 +13,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // MongoDB URI
-const MONGO_URI = process.env.MONGO_URI || `mongodb://${process.env.MONGODB_HOST}:27017/db_products`;
+const MONGO_URI = process.env.MONGO_URI || `mongodb://admin:supersecurepassword@${process.env.MONGODB_HOST}:27017/db_products?authSource=admin`;
+
 // Conexión a MongoDB
 mongoose
   .connect(MONGO_URI)
