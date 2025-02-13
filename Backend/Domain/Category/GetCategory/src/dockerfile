@@ -5,13 +5,13 @@ FROM python:3.9-slim
 WORKDIR /usr/src/app
 
 # Copia los archivos de requerimientos y el código fuente
-COPY requirements.txt ./
+COPY Backend/Domain/Category/GetCategory/src/requirements.txt ./
 COPY . .
 
 # Instala las dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expone el puerto 8002 (cambia de 8000 a 8002)
+# Expone el puerto 8002
 EXPOSE 8002
 
 # Ejecuta la aplicación FastAPI utilizando Uvicorn en el puerto 8002
