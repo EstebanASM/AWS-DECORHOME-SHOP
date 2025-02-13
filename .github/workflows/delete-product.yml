@@ -3,7 +3,7 @@ name: AWS Deployment for DeleteProduct Service
 on:
   push:
     paths:
-      - 'Backend/Domain/Products/DeleteProduct/**'  # Solo se ejecuta cuando hay cambios en esta carpeta
+      - 'Backend/Domain/Products/DeleteProduct/**'  
     branches: ["dev3"]
   pull_request:
     paths:
