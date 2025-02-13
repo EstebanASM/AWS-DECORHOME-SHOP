@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm install
 
 # Instalar mongo-tools (cliente mongo)
-RUN apt-get update && apt-get install -y mongodb-clients
+RUN apt-get update && apt-get install -y mongodb-org-tools
 
 # Copiar el resto de la aplicación al contenedor
 COPY . .
