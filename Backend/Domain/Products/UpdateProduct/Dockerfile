@@ -10,11 +10,8 @@ COPY package*.json ./
 # Instalar las dependencias
 RUN npm install
 
-# Agregar el repositorio de MongoDB
-RUN apt-get update && apt-get install -y gnupg curl
-RUN curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | tee /etc/apt/trusted.gpg.d/mongodb.asc
-RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-RUN apt-get update && apt-get install -y mongodb-database-tools  # Cambié mongodb-org-tools por mongodb-database-tools
+# Instalar las herramientas de MongoDB
+RUN apt-get update && apt-get install -y mongodb-database-tools
 
 # Copiar el resto de la aplicación al contenedor
 COPY . .
