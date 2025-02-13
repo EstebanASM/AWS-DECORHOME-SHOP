@@ -10,6 +10,9 @@ COPY package*.json ./
 # Instalar las dependencias
 RUN npm install
 
+# Instalar mongo-tools (cliente mongo)
+RUN apt-get update && apt-get install -y mongodb-clients
+
 # Copiar el resto de la aplicación al contenedor
 COPY . .
 

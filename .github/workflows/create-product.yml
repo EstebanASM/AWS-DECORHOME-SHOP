@@ -7,7 +7,7 @@ on:
     branches: ["dev3"]
   pull_request:
     paths:
-      - 'Backend/Domain/Products/CreateProduct/**'  # Solo se ejecuta cuando hay cambios en esta carpeta
+      - 'Backend/Domain/Products/CreateProduct/**'  
     branches: ["dev1", "main"]
 
 jobs:
