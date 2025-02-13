@@ -3,11 +3,11 @@ name: AWS Deployment for GetCategory Service
 on:
   push:
     paths:
-      - 'Backend/Domain/Category/GetCategory/**'
+      - 'Backend/Domain/Category/GetCategory/src/**'
     branches: ["dev3"]
   pull_request:
     paths:
-      - 'Backend/Domain/Category/GetCategory/**'
+      - 'Backend/Domain/Category/GetCategory/src/**'
     branches: ["dev1", "main"]
 
 jobs:
